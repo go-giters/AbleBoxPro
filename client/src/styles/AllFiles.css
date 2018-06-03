@@ -1,3 +1,9 @@
 #upload {
   display: none;
 }
+.create-folder {
+  cursor: pointer;
+}
+.btn-outline-secondary:hover {
+  background-color: rgba(108, 117, 125, .25);
+}

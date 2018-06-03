@@ -164,9 +164,7 @@ class AllFiles extends React.Component {
            <Search searchHandler={this.searchHandler} handleKeyPress ={this.handleKeyPress} />
           </Col>
           <Col xs="auto">
-            <Button className="btn-sm btn-link shadow-sm" onClick={this.toggle} type="download">
-              <img background="transparent" src={createFolderIcon} alt="createFolder"/>
-            </Button>
+            <img className="create-folder" background="transparent" src={createFolderIcon} alt="create folder" onClick={this.toggle}/>
             <Modal isOpen={this.state.modal} toggle={this.toggle} className={this.props.className}>
               <ModalHeader toggle={this.toggle}>Folder Name</ModalHeader>
               <ModalBody>

@@ -14,3 +14,16 @@
   font-size: 0.9em;
   color: gray;
 }
+@media only screen and (max-width: 991px) {
+  .file-name {
+    width: 200px;
+    display: inline-block;
+    overflow-y: scroll;
+    white-space: nowrap;
+  }
+
+  .file-name::-webkit-scrollbar {
+    width: 0 !important;
+    height: 0 !important;
+  }
+}

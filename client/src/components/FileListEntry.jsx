@@ -4,7 +4,7 @@ import moment from 'moment';
 import $ from "jquery";
 import Share from './Share.jsx';
 import fileIcon from '../assets/file.png';
-import folderIcon from '../assets/Folder.png';
+import folderIcon from '../assets/folder.png';
 import downloadIcon from '../assets/download.png'
 import css from '../styles/FileListEntry.css';
 
@@ -79,19 +79,19 @@ class FileListEntry extends React.Component {
 		  	<Row className="text-sm-center justify-content-center">
 		  		<Col xs="12" sm="8" md="auto" className="mr-md-auto text-center text-sm-left">
 		  			{this.props.file.is_folder
-			  			? <img width="30px" src={folderIcon} alt="folder icon"/>
-			  			: <img width="30px" src={fileIcon} alt="file icon"/>
+			  			? <img width="32px" src={folderIcon} alt="folder icon"/>
+			  			: <img width="32px" src={fileIcon} alt="file icon"/>
 		  			}
 	   				{this.props.file.is_folder
-              ? <span className="align-middle ml-2"><a href={'/folder/' + this.props.file.id}>{this.props.file.name}</a></span>
-              : <span className="align-middle ml-2">{this.props.file.name}</span>
+              ? <span className="file-name align-middle ml-2 text-left"><a href={'/folder/' + this.props.file.id}>{this.props.file.name}</a></span>
+              : <span className="file-name align-middle ml-2 text-left">{this.props.file.name}</span>
             }
 	   			</Col>
 		  		<Col xs="12" sm="4" md="auto" className="mr-md-4 text-center text-sm-right text-md-left">
 	   				<span className="timestamp align-middle">{moment(this.props.file.lastModified).format('MM/DD/YY h:mm a')}</span>
 	   			</Col>
           <Col xs="auto" className={'mt-3 mt-sm-4 mt-md-0 ' + (this.props.file.is_folder ? 'd-none d-md-block' : '')}>
-            <Button className={'btn-sm btn-link shadow-sm ' + (this.props.file.is_folder ? 'invisible' : '')} onClick={this.handleDownload} type="download">
+            <Button className={'btn btn-sm btn-outline-secondary shadow-sm ' + (this.props.file.is_folder ? 'invisible' : '')} onClick={this.handleDownload} type="download">
               <img background="transparent" src={downloadIcon} alt="Download"/>
             </Button>
           </Col>

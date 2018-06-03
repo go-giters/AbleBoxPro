@@ -1,6 +1,5 @@
 import React from 'react';
 import { Col, Row, Breadcrumb, BreadcrumbItem } from 'reactstrap';
-import folderIcon from '../assets/Folder.png';
 
 const Path = ({path}) => (
   <Row className="mt-3">
