@@ -16,7 +16,7 @@ const os = require('os');
 
 var multer = require('multer');
 var multerS3 = require('multer-s3');
-const ABLEBOX_BUCKET = 'ablebox';
+const ABLEBOX_BUCKET = require('./config.js').keys.bucketName;
 const S3_API_VER = '2006-03-01';
 
 var app = express();
