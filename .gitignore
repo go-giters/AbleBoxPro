@@ -66,3 +66,6 @@ client/dist/*
 
 # config files
 server/config.js
+
+# local  mysql database
+server/db/index.js
