@@ -7,6 +7,7 @@ import fileIcon from '../assets/file.png';
 import folderIcon from '../assets/folder.png';
 import downloadIcon from '../assets/download.png'
 import css from '../styles/FileListEntry.css';
+import Filepath from './Filepath.jsx';
 
 
 class FileListEntry extends React.Component {
@@ -83,8 +84,8 @@ class FileListEntry extends React.Component {
 			  			: <img width="32px" src={fileIcon} alt="file icon"/>
 		  			}
 	   				{this.props.file.is_folder
-              ? <span className="file-name align-middle ml-2 text-left"><a href={'/folder/' + this.props.file.id}>{this.props.file.name}</a></span>
-              : <span className="file-name align-middle ml-2 text-left">{this.props.file.name}</span>
+              ? <span className="file-name align-middle ml-2 text-left"><a href={'/folder/' + this.props.file.id }>{this.props.file.name}</a></span>
+              : <span className="file-name align-middle ml-2 text-left" >{this.props.file.name}</span>
             }
 	   			</Col>
 		  		<Col xs="12" sm="4" md="auto" className="mr-md-4 text-center text-sm-right text-md-left">
@@ -114,6 +115,9 @@ class FileListEntry extends React.Component {
 					? <Progress value={this.state.uploadProgress} className="mt-3" />
 					: null
 				}
+        <Row noGutters={true}>
+          <Filepath file={this.props.file}/>
+        </Row>
 			</Col>
 		);
 	}

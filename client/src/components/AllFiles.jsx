@@ -3,7 +3,7 @@ import FileListEntry from 'Src/components/FileListEntry.jsx';
 import Dropzone from 'Src/components/Dropzone.jsx';
 import Path from 'Src/components/Path.jsx';
 import { withRouter } from 'react-router-dom';
-import { Row, Col, Input, Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
+import { Row, Col, Input, Button, Modal, ModalHeader, ModalBody, ModalFooter} from 'reactstrap';
 import css from 'Src/styles/AllFiles.css';
 import Search from 'Src/components/Search.jsx';
 import $ from "jquery";
@@ -45,6 +45,7 @@ class AllFiles extends React.Component {
       url: '/getfiles',
       contentType: 'application/json; charset=utf-8',
       success: (data, textStatus, jqXHR) => {
+        console.log(JSON.parse(data))
         this.setState({
           files: JSON.parse(data).result,
           path: JSON.parse(data).path
@@ -145,6 +146,17 @@ class AllFiles extends React.Component {
     });
   }
 
+  getPath(fileId) {
+    $.ajax({
+      method: 'GET',
+      url: '/path',
+      data: this.props.file.id,
+      dataType: 'json',
+      success: (data) => {
+        console.log(data)
+      }
+    })
+  }
 
   toggle() {
     this.setState({
@@ -180,7 +192,7 @@ class AllFiles extends React.Component {
         <Path path = {this.state.path}/>
         <Dropzone files={this.state.files} handleFiles={this.handleFiles} searchMode={this.state.searchMode}>
           {this.state.files.length
-            ? this.state.files.map((file, i) => <FileListEntry key={i} file={file} handleClickDelete={this.handleClickDelete}/>)
+            ? this.state.files.map((file, i) => <FileListEntry key={file.id} file={file} handleClickDelete={this.handleClickDelete}/>)
             : null
           }
         </Dropzone>
