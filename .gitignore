@@ -66,3 +66,5 @@ client/dist/*
 
 # config files
 server/config.js
+
+package-lock.json

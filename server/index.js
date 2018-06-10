@@ -258,6 +258,14 @@ app.get('/getfiles', function(req, res) {
   });
 });
 
+app.get('/path', (req, res) => {
+  db.searchPath(req.session.user, req.query.fileId, (err, path) => {
+    // console.log('userid', req.session.user);
+    // console.log('body', req.query);
+    res.end(JSON.stringify(path));
+  })
+})
+
 app.post('/searchfiles', checkUser, function(req, res) {
   let keyword = req.body.keyword;
   let userId = req.session.user;
