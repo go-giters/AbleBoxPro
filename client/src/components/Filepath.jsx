@@ -18,7 +18,6 @@ class Filepath extends React.Component {
       contentType: 'application/json; charset=utf-8',
       success: (data) => {
         let pathString = 'Home'
-        let counter = 0;
         // console.log(this.props.file.id)
         data.forEach((thing) => {
           if (!(thing.folder_id === 0)){
