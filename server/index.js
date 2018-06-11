@@ -309,6 +309,22 @@ app.post('/delete', checkUser, function(req, res) {
   });
 });
 
+app.put('/updateName', function(req, res) {
+  let name = req.body.name;
+  let id = req.body.id;
+  db.updateName(name, id, (err, result) => {
+    if (err) {
+      res.status = 404;
+      res.write(err);
+      res.end();
+    } else {
+      res.status = 200;
+      res.write(JSON.stringify(result));
+      res.end();
+    }
+  });
+});
+
 app.post('/createFolder', createFolder, function(req, res) {
   db.createFolder(req, function(err, result) {
     if (err) {
