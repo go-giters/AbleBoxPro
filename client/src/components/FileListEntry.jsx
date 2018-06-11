@@ -79,14 +79,6 @@ class FileListEntry extends React.Component {
 
   launchEditor() {
     let data = {id: this.props.file.id};
-    console.log('data: ', data)
-    console.log('launchEditor')
-    var params = {
-      apikey: '533d54da99db2a90e564dd6496f91af1',
-      mode:'normaledit',
-      saveurl: 'https://s3-us-west-2.amazonaws.com/myabx/2/extend-not-at-end.txt',
-      format: '.txt'
-    }
     $.ajax ({
       type: 'POST',
       url: '/launchEditor',
@@ -98,18 +90,6 @@ class FileListEntry extends React.Component {
         console.error("DOWNLOAD ERROR", errorThrown);
       },
     });
-    // $.ajax ({
-    //   type: 'POST',
-    //   url: 'https://writer.zoho.com/writer/remotedoc.im',
-    //   data: params,
-    //   success: (data, textStatus, jqXHR) => {
-    //     console.log('success')
-    //     console.log('data: ', data)
-    //   },
-    //   error: function(XMLHttpRequest, textStatus, errorThrown) {
-    //     console.error("DOWNLOAD ERROR", errorThrown);
-    //   },
-    // });
   }
 
 	render() {

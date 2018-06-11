@@ -14,7 +14,6 @@ const { Writable } = require('stream');
 var FileSaver = require('file-saver');
 const os = require('os');
 
-// var https = require('https');
 var request = require('request');
 
 var multer = require('multer');
@@ -83,8 +82,7 @@ var upload = multer({
   storage: multerS3({
     s3: s3,
     bucket: ABLEBOX_BUCKET,
-    //changed from private to public for testing purposes. NEED TO CHANGE BACK!!
-    // acl: 'private',
+    acl: 'private',
     contentType: multerS3.AUTO_CONTENT_TYPE,
     metadata: function (req, file, cb) {
       cb(null, {fieldName: file.fieldname});
@@ -149,53 +147,23 @@ app.get('/home', checkUser, (req, res) => {
 });
 
 app.post('/launchEditor/', (req, res) => {
-  console.log('req.body.id: ', req.body.id)
-
   db.getHash(req.body.id, function (err, result) {
-    // var filename;
     if (err) {
       res.status = 404;
+      //must refresh or this error will be thrown
       res.write(err);
       res.end();
     } else {
-      console.log('result from getHash: ', result)
-
-    var hash = result[0].hash
-    console.log('hash inside post to launchEditor: ', hash)
-    var url = `https://ipfs.io/ipfs/${hash}`
-
-    request(`https://writer.zoho.com/writer/remotedoc.im?url=${url}&apikey=533d54da99db2a90e564dd6496f91af1`, { json: true }, (err, response, body) => {
-      if (err) { return console.log(err); }
-      console.log('body: ', body)
-      var arr = body.split('=');
-      var body = arr[1] + '=' + arr[2].slice(0, -7);
-      console.log('body.URL: ', body);
-      res.status(200).json(body)
-    });
-
+      var hash = result[0].hash
+      var url = `https://ipfs.io/ipfs/${hash}`
+      const zoho = require('./config.js').editor.apikey;
+      request(`https://writer.zoho.com/writer/remotedoc.im?url=${url}&apikey=${zoho}`, { json: true }, (err, response, body) => {
+        if (err) { return console.log(err); }
+        var arr = body.split('=');
+        var body = arr[1] + '=' + arr[2].slice(0, -7);
+        res.status(200).json(body)
+      });
     };
-
-// var url = s3.getSignedUrl('getObject', options);
-// console.log('The URL is', url);
-
-// s3.getSignedUrl('putObject', options, function (err, url) {
-//   console.log('The URL is', url);
-
-    // var hash = 'QmeF2Pywk2X1FrgcZQokYEBKZsZT4EnB2hStRDB1AczQWB'
-    // var url = `https://ipfs.io/ipfs/${hash}`
-
-    // request(`https://writer.zoho.com/writer/remotedoc.im?url=${url}&apikey=533d54da99db2a90e564dd6496f91af1`, { json: true }, (err, response, body) => {
-    //   if (err) { return console.log(err); }
-    //   console.log('body: ', body)
-    //   var arr = body.split('=');
-    //   var body = arr[1] + '=' + arr[2].slice(0, -7);
-    //   console.log('body.URL: ', body);
-    //   res.status(200).json(body)
-    // });
-
-// });
-
-
   });
 });
 
@@ -266,25 +234,6 @@ app.get('/logout', (req, res) => {
 });
 
 app.post('/upload', checkUser, upload.single('file'), function(req, res, next) {
-
-  console.log('req.file: ', req.file)
-  console.log('req.body: ', req.body)
-
-  // request(
-
-  //   `http://localhost:5001/api/v0/add?recursive=false&quiet=<value>&quieter=<value>&silent=<value>&progress=<value>&trickle=<value>&only-hash=<value>&wrap-with-directory=<value>&hidden=<value>&chunker=<value>&pin=true&raw-leaves=<value>&nocopy=<value>&fscache=<value>&cid-version=0&hash=sha2-256`
-
-  //   , { json: true }, (err, response, body) => {
-  //   if (err) { return console.log(err); }
-  //   console.log('body: ', body)
-  //   var arr = body.split('=');
-  //   var body = arr[1] + '=' + arr[2].slice(0, -7);
-  //   console.log('body.URL: ', body);
-  //   res.status(200).json(body)
-  // });
-
-
-
   //TODO: validate user email/userid against the sessionid
   db.createFile(req, function(err, result) {
     if (err) {
@@ -422,7 +371,6 @@ app.get('/download', function(req, res, next) {
         res.setHeader('Content-Length', data.ContentLength);
 
         stream.on('data', (data) => {
-          console.log('data: ', data)
           file.write(data);
         }).on('end', function () {
           file.end();
