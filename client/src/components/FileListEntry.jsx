@@ -8,12 +8,12 @@ import folderIcon from '../assets/folder.png';
 import downloadIcon from '../assets/download.png';
 import css from '../styles/FileListEntry.css';
 import Filepath from './Filepath.jsx';
-
+import Rename from './Rename.jsx';
 
 class FileListEntry extends React.Component {
   constructor(props) {
     super(props);
-
+    
     this.state = {
       uploadProgress: 0,
       upload: !!this.props.file.upload
@@ -78,6 +78,7 @@ class FileListEntry extends React.Component {
     return (
       <Col xs="auto" className="file-list-entry py-3">
         <Row className="text-sm-center justify-content-center">
+          <Rename file={this.props.file} getFiles={this.props.getFiles}/>
           <Col xs="12" sm="8" md="auto" className="mr-md-auto text-center text-sm-left">
             {this.props.file.is_folder
               ? <img width="32px" src={folderIcon} alt="folder icon"/>
