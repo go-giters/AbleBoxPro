@@ -16,7 +16,7 @@ const os = require('os');
 
 var multer = require('multer');
 var multerS3 = require('multer-s3');
-const ABLEBOX_BUCKET = require('./config.js').keys.bucketName;
+const ABLEBOX_BUCKET = require('./config.js').bucketName;
 const S3_API_VER = '2006-03-01';
 
 var app = express();
@@ -257,6 +257,14 @@ app.get('/getfiles', function(req, res) {
     }
   });
 });
+
+app.get('/path', (req, res) => {
+  db.searchPath(req.session.user, req.query.fileId, (err, path) => {
+    // console.log('userid', req.session.user);
+    // console.log('body', req.query);
+    res.end(JSON.stringify(path));
+  })
+})
 
 app.post('/searchfiles', checkUser, function(req, res) {
   let keyword = req.body.keyword;
