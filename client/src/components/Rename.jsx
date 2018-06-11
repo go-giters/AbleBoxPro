@@ -11,7 +11,6 @@ class Rename extends React.Component {
       modal: false,
       name: this.props.file.name,
       id: this.props.file.id,
-      file: this.props.file
     };
 
     this.toggle = this.toggle.bind(this);
@@ -32,8 +31,6 @@ class Rename extends React.Component {
   }
 
   handleRename(name, id) {
-    // console.log('e.target.value', e.target.value);
-    console.log('handleRename');
     let targetItem = {
       name: name,
       id: id
@@ -44,12 +41,9 @@ class Rename extends React.Component {
       url: '/updateName',
       data: JSON.stringify(targetItem),
       contentType: 'application/json; charset=utf-8',
-      success: (data, textStatus, jqXHR) => {
+      success: () => {
         this.toggle();
         this.props.getFiles();
-        this.setState ({
-          file: this.props.file
-        });
       },
       error: function(XMLHttpRequest, textStatus, errorThrown) {
         alert('handlerename error: ' + errorThrown);
