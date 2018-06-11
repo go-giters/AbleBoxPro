@@ -14,6 +14,13 @@ class Login extends React.Component {
     this.handleSubmit = this.handleSubmit.bind(this);
   }
 
+  componentDidMount() {
+    var parsedUrl = new URL(window.location.href);
+console.log(parsedUrl.searchParams); // 123
+    console.log('window.url: ', Window.URL)
+    console.log('document.domain: ', document.domain)
+  }
+
   handleChange(e) {
     e.preventDefault();
     this.setState({
@@ -40,6 +47,8 @@ class Login extends React.Component {
       alert('failed to login');
     });
   }
+
+
 
   render() {
     return (

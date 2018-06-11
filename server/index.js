@@ -14,6 +14,8 @@ const { Writable } = require('stream');
 var FileSaver = require('file-saver');
 const os = require('os');
 
+var request = require('request');
+
 var multer = require('multer');
 var multerS3 = require('multer-s3');
 const ABLEBOX_BUCKET = require('./config.js').bucketName;
@@ -76,6 +78,7 @@ var getObject = function(objectKey, cb) {
 }
 
 var upload = multer({
+  preservePath: true,
   storage: multerS3({
     s3: s3,
     bucket: ABLEBOX_BUCKET,
@@ -141,6 +144,27 @@ var checkUser = (req, res, next) => {
 app.get('/home', checkUser, (req, res) => {
   req.session.folderId = 0;
   res.sendFile(path.resolve(__dirname + '/../client/dist/index.html'));
+});
+
+app.post('/launchEditor/', (req, res) => {
+  db.getHash(req.body.id, function (err, result) {
+    if (err) {
+      res.status = 404;
+      //must refresh or this error will be thrown
+      res.write(err);
+      res.end();
+    } else {
+      var hash = result[0].hash
+      var url = `https://ipfs.io/ipfs/${hash}`
+      const zoho = require('./config.js').editor.apikey;
+      request(`https://writer.zoho.com/writer/remotedoc.im?url=${url}&apikey=${zoho}`, { json: true }, (err, response, body) => {
+        if (err) { return console.log(err); }
+        var arr = body.split('=');
+        var body = arr[1] + '=' + arr[2].slice(0, -7);
+        res.status(200).json(body)
+      });
+    };
+  });
 });
 
 app.post('/login', (req, res) => {
@@ -237,6 +261,7 @@ app.get('/folder/:folderId', (req, res) => {
 });
 
 app.get('/getfiles', function(req, res) {
+
   let folderId = req.session.folderId;
   let userId = req.session.user;
   db.getFiles(folderId, userId, function(err, result) {
@@ -345,6 +370,7 @@ app.get('/download', function(req, res, next) {
           console.error(err);
           return next();
         }
+        console.log('first data: ', data)
         var file = fs.createWriteStream(os.homedir() + '/Downloads/' + filename);
         var stream = s3.getObject(options).createReadStream();
 

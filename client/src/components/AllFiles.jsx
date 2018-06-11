@@ -9,7 +9,7 @@ import Search from 'Src/components/Search.jsx';
 import $ from "jquery";
 import createFolderIcon from 'Src/assets/createFolder.png';
 import { debounce } from 'lodash';
-
+import ipfsAPI from 'ipfs-api';
 
 
 class AllFiles extends React.Component {
@@ -17,10 +17,13 @@ class AllFiles extends React.Component {
     super(props);
 
     this.state = {
+      files: null,
       searchMode: false,
       folderName: '',
       path: []
     };
+
+    this.ipfsApi = ipfsAPI('localhost', '5001')
 
     this.handleClick = this.handleClick.bind(this);
     this.handleFiles = this.handleFiles.bind(this);
@@ -28,11 +31,10 @@ class AllFiles extends React.Component {
     this.handleTitleChange = this.handleTitleChange.bind(this);
     this.handleKeyPress = this.handleKeyPress.bind(this);
     this.createFolder = this.createFolder.bind(this);
-    this.handleClick = this.handleClick.bind(this);
-    this.handleFiles = this.handleFiles.bind(this);
     this.searchHandler = debounce(this.searchHandler.bind(this), 500);
     this.handleClickDelete = this.handleClickDelete.bind(this);
     this.toggle = this.toggle.bind(this);
+    this.saveToIpfs = this.saveToIpfs.bind(this);
   }
 
   componentDidMount() {
@@ -62,11 +64,31 @@ class AllFiles extends React.Component {
   }
 
   handleFiles(files) {
-    // add upload key to trigger upload upon FileListEntry mount
-    files.forEach(file => file.upload = true);
-    this.setState({
-      files: [...this.state.files].concat(files),
-    });
+    let reader = new window.FileReader()
+    reader.readAsArrayBuffer(files[0])
+    reader.onloadend = () => {
+      this.saveToIpfs(reader, files);
+    }
+  }
+
+  saveToIpfs(reader, files) {
+    let ipfsId
+    const buffer = Buffer.from(reader.result)
+    this.ipfsApi.add(buffer, { progress: (prog) => console.log(`received: ${prog}`) })
+    .then((response) => {
+      ipfsId = response[0].hash
+      var fileLocation = 'https://ipfs.io/ipfs/' + ipfsId
+      files.forEach(file => {
+        file.upload = true;
+        file.hash = ipfsId
+        console.log('file: ', file)
+      });
+      this.setState({
+        files: [...this.state.files].concat(files),
+      });
+    }).catch((err) => {
+      console.error(err)
+    })
   }
 
   searchHandler(value) {

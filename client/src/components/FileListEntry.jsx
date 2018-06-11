@@ -19,6 +19,7 @@ class FileListEntry extends React.Component {
 			upload: !!this.props.file.upload
 		};
 		this.handleDownload = this.handleDownload.bind(this);
+    this.launchEditor = this.launchEditor.bind(this);
 	}
 
 	handleDownload(e) {
@@ -42,9 +43,12 @@ class FileListEntry extends React.Component {
 
 	componentDidMount() {
 		if (this.state.upload) {
+      console.log('this.props.file: ', this.props.file)
+
 			const formData = new FormData();
 
 			formData.append('file', this.props.file, this.props.file.name);
+      formData.append('body', this.props.file.hash)
 
 		  const req = new XMLHttpRequest();
 
@@ -74,6 +78,21 @@ class FileListEntry extends React.Component {
 		}
 	}
 
+  launchEditor() {
+    let data = {id: this.props.file.id};
+    $.ajax ({
+      type: 'POST',
+      url: '/launchEditor',
+      data: data,
+      success: (data, textStatus, jqXHR) => {
+        console.log('data: ', data)
+      },
+      error: function(XMLHttpRequest, textStatus, errorThrown) {
+        console.error("DOWNLOAD ERROR", errorThrown);
+      },
+    });
+  }
+
 	render() {
 		return (
 		  <Col xs="auto" className="file-list-entry py-3">
@@ -84,8 +103,8 @@ class FileListEntry extends React.Component {
 			  			: <img width="32px" src={fileIcon} alt="file icon"/>
 		  			}
 	   				{this.props.file.is_folder
-              ? <span className="file-name align-middle ml-2 text-left"><a href={'/folder/' + this.props.file.id }>{this.props.file.name}</a></span>
-              : <span className="file-name align-middle ml-2 text-left" >{this.props.file.name}</span>
+              ? <span className="file-name align-middle ml-2 text-left"><a href={'/folder/' + this.props.file.id}>{this.props.file.name}</a></span>
+              : <span className="file-name align-middle ml-2 text-left" onClick={this.launchEditor}>{this.props.file.name}</span>
             }
 	   			</Col>
 		  		<Col xs="12" sm="4" md="auto" className="mr-md-4 text-center text-sm-right text-md-left">
