@@ -9,7 +9,10 @@ import Search from 'Src/components/Search.jsx';
 import $ from "jquery";
 import createFolderIcon from 'Src/assets/createFolder.png';
 import { debounce } from 'lodash';
-
+import web3 from '../web3.js';
+import ipfs from '../ipfs.js';
+import storehash from '../storehash.js';
+import ipfsAPI from 'ipfs-api';
 
 
 class AllFiles extends React.Component {
@@ -17,10 +20,22 @@ class AllFiles extends React.Component {
     super(props);
 
     this.state = {
+      files: null,
       searchMode: false,
       folderName: '',
-      path: []
+      path: [],
+      ipfsHash:null,
+      buffer:'',
+      ethAddress:'',
+      blockNumber:'',
+      transactionHash:'',
+      gasUsed:'',
+      txReceipt: '',
+      currentFile: null,
+      hash: null
     };
+
+    this.ipfsApi = ipfsAPI('localhost', '5001')
 
     this.handleClick = this.handleClick.bind(this);
     this.handleFiles = this.handleFiles.bind(this);
@@ -28,11 +43,13 @@ class AllFiles extends React.Component {
     this.handleTitleChange = this.handleTitleChange.bind(this);
     this.handleKeyPress = this.handleKeyPress.bind(this);
     this.createFolder = this.createFolder.bind(this);
-    this.handleClick = this.handleClick.bind(this);
-    this.handleFiles = this.handleFiles.bind(this);
     this.searchHandler = debounce(this.searchHandler.bind(this), 500);
     this.handleClickDelete = this.handleClickDelete.bind(this);
     this.toggle = this.toggle.bind(this);
+    // this.convertToBuffer = this.convertToBuffer.bind(this);
+    // this.onSubmit = this.onSubmit.bind(this);
+    this.onClick = this.onClick.bind(this);
+    this.saveToIpfs = this.saveToIpfs.bind(this);
   }
 
   componentDidMount() {
@@ -61,11 +78,61 @@ class AllFiles extends React.Component {
   }
 
   handleFiles(files) {
+    // let buffreader = new window.FileReader()
+    // buffreader.onloadend = () => this.saveToIpfs(buffreader)
+    // buffreader.readAsArrayBuffer(files[0]);
+
+    // console.log('handleFiles is being called')
+    // if (files[0]) {
+    //   console.log(files[0])
+    //   let urlreader = new FileReader();
+    //   urlreader.onload = function(e) {
+    //     console.log('e.target.result: ', e.target.result);
+    //   }
+    //   reader.readAsDataURL(files[0]);
+    // }
+
+    let reader = new window.FileReader()
+    reader.readAsArrayBuffer(files[0])
+    reader.onloadend = () => {
+      // this.convertToBuffer(reader);
+      this.saveToIpfs(reader, files);
+    }
     // add upload key to trigger upload upon FileListEntry mount
-    files.forEach(file => file.upload = true);
-    this.setState({
-      files: [...this.state.files].concat(files),
-    });
+    // files.forEach(file => {
+    //   file.upload = true;
+    //   file.hash = this.state.hash
+    // });
+    // this.setState({
+    //   files: [...this.state.files].concat(files),
+    // });
+  }
+
+  saveToIpfs(reader, files) {
+
+    let ipfsId
+    const buffer = Buffer.from(reader.result)
+    this.ipfsApi.add(buffer, { progress: (prog) => console.log(`received: ${prog}`) })
+      .then((response) => {
+        console.log(response)
+        ipfsId = response[0].hash
+        console.log('ipfsId: ', ipfsId)
+        var fileLocation = 'https://ipfs.io/ipfs/' + ipfsId
+        console.log('fileLocation: ', fileLocation)
+        this.setState({hash: ipfsId}, () => {
+          files.forEach(file => {
+            file.upload = true;
+            file.hash = this.state.hash
+            console.log('file: ', file)
+          });
+          this.setState({
+            files: [...this.state.files].concat(files),
+          });
+        })
+      }).catch((err) => {
+        console.error(err)
+      })
+
   }
 
   searchHandler(value) {
@@ -90,6 +157,63 @@ class AllFiles extends React.Component {
       });
     }
   }
+
+  // async convertToBuffer(reader) {
+  //   console.log('convertToBuffer is being called')
+  //   const buffer = await Buffer.from(reader.result);
+  //   this.setState({buffer}, () => this.onSubmit());
+  // }
+
+  // async onSubmit() {
+  //   console.log('storehash: ', storehash)
+  //   //upload file to IPFS
+  //   const accounts = await web3.eth.getAccounts();
+  //   console.log('Sending from Metamask account: ' + accounts[0]);
+  //   const ethAddress = await storehash.options.address;
+  //   this.setState({ethAddress});
+  //   await ipfs.add(this.state.buffer, (err, ipfsHash) => {
+  //     console.log(err,ipfsHash);
+  //     this.setState({ ipfsHash:ipfsHash[0].hash }, () => {
+  //       console.log('set ipfsHash')
+  //       storehash.methods.sendHash(this.state.ipfsHash).send({
+  //         //this requires an accept through metamask plugin in order to continue
+  //         from: accounts[0]
+  //       }, (error, transactionHash) => {
+  //         console.log('line 128')
+  //         console.log(transactionHash);
+  //         this.setState({transactionHash}, this.onClick());
+  //       });
+  //     });
+
+  //   })
+  // };
+
+
+async onClick() {
+  console.log('onClick is being called')
+  //get Ethereum receipt
+  try {
+    this.setState({blockNumber:"waiting.."});
+    this.setState({gasUsed:"waiting..."});
+//get Transaction Receipt in console on click
+//See: https://web3js.readthedocs.io/en/1.0/web3-eth.html#gettransactionreceipt
+    await web3.eth.getTransactionReceipt(this.state.transactionHash, (err, txReceipt)=>{
+      console.log('txReceipt: ', txReceipt)
+      console.log(err,txReceipt);
+      this.setState({txReceipt});
+    }); //await for getTransactionReceipt
+    await this.setState({blockNumber: this.state.txReceipt.blockNumber});
+    await this.setState({gasUsed: this.state.txReceipt.gasUsed});
+  } //try
+  catch(error){
+    console.log(error);
+  } //catch
+} //onClick
+
+
+
+
+
 
   createFolder() {
     const data = {
@@ -145,12 +269,13 @@ class AllFiles extends React.Component {
     });
   }
 
-
   toggle() {
     this.setState({
       modal: !this.state.modal,
     });
   }
+
+
 
   render () {
     if (!this.state.files) {

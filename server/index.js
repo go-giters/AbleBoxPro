@@ -14,6 +14,9 @@ const { Writable } = require('stream');
 var FileSaver = require('file-saver');
 const os = require('os');
 
+// var https = require('https');
+var request = require('request');
+
 var multer = require('multer');
 var multerS3 = require('multer-s3');
 const ABLEBOX_BUCKET = require('./config.js').keys.bucketName;
@@ -76,10 +79,12 @@ var getObject = function(objectKey, cb) {
 }
 
 var upload = multer({
+  preservePath: true,
   storage: multerS3({
     s3: s3,
     bucket: ABLEBOX_BUCKET,
-    acl: 'private',
+    //changed from private to public for testing purposes. NEED TO CHANGE BACK!!
+    // acl: 'private',
     contentType: multerS3.AUTO_CONTENT_TYPE,
     metadata: function (req, file, cb) {
       cb(null, {fieldName: file.fieldname});
@@ -141,6 +146,57 @@ var checkUser = (req, res, next) => {
 app.get('/home', checkUser, (req, res) => {
   req.session.folderId = 0;
   res.sendFile(path.resolve(__dirname + '/../client/dist/index.html'));
+});
+
+app.post('/launchEditor/', (req, res) => {
+  console.log('req.body.id: ', req.body.id)
+
+  db.getHash(req.body.id, function (err, result) {
+    // var filename;
+    if (err) {
+      res.status = 404;
+      res.write(err);
+      res.end();
+    } else {
+      console.log('result from getHash: ', result)
+
+    var hash = result[0].hash
+    console.log('hash inside post to launchEditor: ', hash)
+    var url = `https://ipfs.io/ipfs/${hash}`
+
+    request(`https://writer.zoho.com/writer/remotedoc.im?url=${url}&apikey=533d54da99db2a90e564dd6496f91af1`, { json: true }, (err, response, body) => {
+      if (err) { return console.log(err); }
+      console.log('body: ', body)
+      var arr = body.split('=');
+      var body = arr[1] + '=' + arr[2].slice(0, -7);
+      console.log('body.URL: ', body);
+      res.status(200).json(body)
+    });
+
+    };
+
+// var url = s3.getSignedUrl('getObject', options);
+// console.log('The URL is', url);
+
+// s3.getSignedUrl('putObject', options, function (err, url) {
+//   console.log('The URL is', url);
+
+    // var hash = 'QmeF2Pywk2X1FrgcZQokYEBKZsZT4EnB2hStRDB1AczQWB'
+    // var url = `https://ipfs.io/ipfs/${hash}`
+
+    // request(`https://writer.zoho.com/writer/remotedoc.im?url=${url}&apikey=533d54da99db2a90e564dd6496f91af1`, { json: true }, (err, response, body) => {
+    //   if (err) { return console.log(err); }
+    //   console.log('body: ', body)
+    //   var arr = body.split('=');
+    //   var body = arr[1] + '=' + arr[2].slice(0, -7);
+    //   console.log('body.URL: ', body);
+    //   res.status(200).json(body)
+    // });
+
+// });
+
+
+  });
 });
 
 app.post('/login', (req, res) => {
@@ -210,6 +266,25 @@ app.get('/logout', (req, res) => {
 });
 
 app.post('/upload', checkUser, upload.single('file'), function(req, res, next) {
+
+  console.log('req.file: ', req.file)
+  console.log('req.body: ', req.body)
+
+  // request(
+
+  //   `http://localhost:5001/api/v0/add?recursive=false&quiet=<value>&quieter=<value>&silent=<value>&progress=<value>&trickle=<value>&only-hash=<value>&wrap-with-directory=<value>&hidden=<value>&chunker=<value>&pin=true&raw-leaves=<value>&nocopy=<value>&fscache=<value>&cid-version=0&hash=sha2-256`
+
+  //   , { json: true }, (err, response, body) => {
+  //   if (err) { return console.log(err); }
+  //   console.log('body: ', body)
+  //   var arr = body.split('=');
+  //   var body = arr[1] + '=' + arr[2].slice(0, -7);
+  //   console.log('body.URL: ', body);
+  //   res.status(200).json(body)
+  // });
+
+
+
   //TODO: validate user email/userid against the sessionid
   db.createFile(req, function(err, result) {
     if (err) {
@@ -237,6 +312,7 @@ app.get('/folder/:folderId', (req, res) => {
 });
 
 app.get('/getfiles', function(req, res) {
+
   let folderId = req.session.folderId;
   let userId = req.session.user;
   db.getFiles(folderId, userId, function(err, result) {
@@ -337,6 +413,7 @@ app.get('/download', function(req, res, next) {
           console.error(err);
           return next();
         }
+        console.log('first data: ', data)
         var file = fs.createWriteStream(os.homedir() + '/Downloads/' + filename);
         var stream = s3.getObject(options).createReadStream();
 
@@ -345,6 +422,7 @@ app.get('/download', function(req, res, next) {
         res.setHeader('Content-Length', data.ContentLength);
 
         stream.on('data', (data) => {
+          console.log('data: ', data)
           file.write(data);
         }).on('end', function () {
           file.end();

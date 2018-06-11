@@ -18,6 +18,7 @@ class FileListEntry extends React.Component {
 			upload: !!this.props.file.upload
 		};
 		this.handleDownload = this.handleDownload.bind(this);
+    this.launchEditor = this.launchEditor.bind(this);
 	}
 
 	handleDownload(e) {
@@ -41,9 +42,12 @@ class FileListEntry extends React.Component {
 
 	componentDidMount() {
 		if (this.state.upload) {
+      console.log('this.props.file: ', this.props.file)
+
 			const formData = new FormData();
 
 			formData.append('file', this.props.file, this.props.file.name);
+      formData.append('body', this.props.file.hash)
 
 		  const req = new XMLHttpRequest();
 
@@ -73,6 +77,41 @@ class FileListEntry extends React.Component {
 		}
 	}
 
+  launchEditor() {
+    let data = {id: this.props.file.id};
+    console.log('data: ', data)
+    console.log('launchEditor')
+    var params = {
+      apikey: '533d54da99db2a90e564dd6496f91af1',
+      mode:'normaledit',
+      saveurl: 'https://s3-us-west-2.amazonaws.com/myabx/2/extend-not-at-end.txt',
+      format: '.txt'
+    }
+    $.ajax ({
+      type: 'POST',
+      url: '/launchEditor',
+      data: data,
+      success: (data, textStatus, jqXHR) => {
+        console.log('data: ', data)
+      },
+      error: function(XMLHttpRequest, textStatus, errorThrown) {
+        console.error("DOWNLOAD ERROR", errorThrown);
+      },
+    });
+    // $.ajax ({
+    //   type: 'POST',
+    //   url: 'https://writer.zoho.com/writer/remotedoc.im',
+    //   data: params,
+    //   success: (data, textStatus, jqXHR) => {
+    //     console.log('success')
+    //     console.log('data: ', data)
+    //   },
+    //   error: function(XMLHttpRequest, textStatus, errorThrown) {
+    //     console.error("DOWNLOAD ERROR", errorThrown);
+    //   },
+    // });
+  }
+
 	render() {
 		return (
 		  <Col xs="auto" className="file-list-entry py-3">
@@ -84,7 +123,7 @@ class FileListEntry extends React.Component {
 		  			}
 	   				{this.props.file.is_folder
               ? <span className="file-name align-middle ml-2 text-left"><a href={'/folder/' + this.props.file.id}>{this.props.file.name}</a></span>
-              : <span className="file-name align-middle ml-2 text-left">{this.props.file.name}</span>
+              : <span className="file-name align-middle ml-2 text-left" onClick={this.launchEditor}>{this.props.file.name}</span>
             }
 	   			</Col>
 		  		<Col xs="12" sm="4" md="auto" className="mr-md-4 text-center text-sm-right text-md-left">

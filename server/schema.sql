@@ -27,6 +27,7 @@ CREATE TABLE files (
   is_folder TINYINT(1) NOT NULL DEFAULT 0,
   is_public TINYINT(1) NOT NULL DEFAULT 0,
   s3_objectId VARCHAR(400) NOT NULL,
+  hash VARCHAR(200) NOT NULL,
   PRIMARY KEY (id),
   FOREIGN KEY (user_id) REFERENCES users(id),
   INDEX (folder_id),
