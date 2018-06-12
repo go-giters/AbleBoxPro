@@ -283,6 +283,26 @@ app.get('/getfiles', function(req, res) {
   });
 });
 
+app.get('/getfolders', function(req, res) {
+  let folderId = req.session.folderId;
+  let userId = req.session.user;
+  db.getAllFolders(function(err, result) {
+    if (err) {
+      res.status = 404;
+      res.write(JSON.stringify(err));
+      res.end();
+    } else {
+      console.log('result in getfolders: ', result)
+      res.status = 200;
+        let data = {
+          'result': result
+        }
+        res.write(JSON.stringify(data));
+        res.end();
+      };
+    });
+});
+
 app.get('/path', (req, res) => {
   db.searchPath(req.session.user, req.query.fileId, (err, path) => {
     // console.log('userid', req.session.user);

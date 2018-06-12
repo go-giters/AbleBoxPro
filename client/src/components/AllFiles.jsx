@@ -20,7 +20,8 @@ class AllFiles extends React.Component {
       files: null,
       searchMode: false,
       folderName: '',
-      path: []
+      path: [],
+      allFolders: null
     };
 
     this.ipfsApi = ipfsAPI('localhost', '5001')
@@ -36,10 +37,12 @@ class AllFiles extends React.Component {
     this.toggle = this.toggle.bind(this);
     this.saveToIpfs = this.saveToIpfs.bind(this);
     this.getFiles = this.getFiles.bind(this);
+    this.getAllFolders = this.getAllFolders.bind(this);
   }
 
   componentDidMount() {
     this.getFiles();
+    this.getAllFolders();
   }
 
   getFiles() {
@@ -52,6 +55,24 @@ class AllFiles extends React.Component {
         this.setState({
           files: JSON.parse(data).result,
           path: JSON.parse(data).path
+        });
+      },
+      error: function(XMLHttpRequest, textStatus, errorThrown) {
+        alert(errorThrown); // need to decide on what we are doing here with the error
+      },
+    });
+  }
+
+  getAllFolders() {
+    $.ajax ({
+      type: 'GET',
+      url: '/getfolders',
+      contentType: 'application/json; charset=utf-8',
+      success: (data, textStatus, jqXHR) => {
+        console.log('data: ', data)
+        console.log(JSON.parse(data));
+        this.setState({
+          allFolders: JSON.parse(data).result
         });
       },
       error: function(XMLHttpRequest, textStatus, errorThrown) {

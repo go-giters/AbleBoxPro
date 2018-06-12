@@ -109,6 +109,18 @@ const getFiles = (folderId, userId, cb) => {
   });
 };
 
+const getAllFolders = (cb) => {
+  const query = 'SELECT id, name, s3_objectId, is_public, created_on as lastModified, is_folder FROM files WHERE is_folder = 1 ORDER BY is_folder DESC, name';
+
+  db.connection.query(query, (err, result, fields) => {
+    if (err) {
+      cb(err, null);
+    } else {
+      cb(null, result);
+    }
+  });
+};
+
 const updateName = (name, id, cb) => {
   const query = 'UPDATE files SET name = ? WHERE id = ?';
   db.connection.query(query, [name, id], (err, result) => {
@@ -232,3 +244,4 @@ exports.shareFileExistingUser = shareFileExistingUser;
 exports.verifyFileExistenceAndPermissions = verifyFileExistenceAndPermissions;
 exports.getHash = getHash;
 exports.updateName = updateName;
+exports.getAllFolders = getAllFolders;
