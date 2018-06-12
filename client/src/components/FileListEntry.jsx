@@ -1,5 +1,5 @@
 import React from 'react';
-import { Alert, Button, Row, Col, Progress } from 'reactstrap';
+import { Alert, Button, Row, Col, Progress, Modal } from 'reactstrap';
 import moment from 'moment';
 import $ from 'jquery';
 import Share from './Share.jsx';
@@ -9,6 +9,7 @@ import downloadIcon from '../assets/download.png';
 import css from '../styles/FileListEntry.css';
 import Filepath from './Filepath.jsx';
 import Rename from './Rename.jsx';
+import loadicon from 'Src/assets/loader.gif'
 
 class FileListEntry extends React.Component {
 	constructor(props) {
@@ -16,10 +17,14 @@ class FileListEntry extends React.Component {
 
 		this.state = {
 			uploadProgress: 0,
-			upload: !!this.props.file.upload
+			upload: !!this.props.file.upload,
+      loadingEditor: false,
+      modal: false,
+      url: ''
 		};
 		this.handleDownload = this.handleDownload.bind(this);
     this.launchEditor = this.launchEditor.bind(this);
+    this.toggle = this.toggle.bind(this);
 	}
 
   handleDownload(e) {
@@ -79,6 +84,7 @@ class FileListEntry extends React.Component {
   }
 
   launchEditor() {
+    this.setState({loadingEditor: true})
     let data = {id: this.props.file.id};
     $.ajax ({
       type: 'POST',
@@ -86,6 +92,12 @@ class FileListEntry extends React.Component {
       data: data,
       success: (data, textStatus, jqXHR) => {
         console.log('data: ', data)
+        this.setState({
+          loadingEditor: false
+          //uncomment to enable modal:
+          // modal: true,
+          // url: data
+        }, () => window.open(data));
       },
       error: function(XMLHttpRequest, textStatus, errorThrown) {
         console.error("DOWNLOAD ERROR", errorThrown);
@@ -93,10 +105,22 @@ class FileListEntry extends React.Component {
     });
   }
 
+  toggle() {
+    this.setState({
+      modal: !this.state.modal
+    });
+  }
+
   render() {
     return (
+      <div>
+        <Modal id="modal" isOpen={this.state.modal}>
+          <iframe src={this.state.url}></iframe>
+          <Button color="secondary" onClick={this.toggle}>Cancel</Button>
+        </Modal>
       <Col xs="auto" className="file-list-entry py-3">
         <Row className="text-sm-center justify-content-center">
+        {this.state.loadingEditor && <img src={loadicon}></img>}
           <Rename file={this.props.file} getFiles={this.props.getFiles}/>
           <Col xs="12" sm="8" md="auto" className="mr-md-auto text-center text-sm-left">
             {this.props.file.is_folder
@@ -139,6 +163,7 @@ class FileListEntry extends React.Component {
           <Filepath file={this.props.file}/>
         </Row>
       </Col>
+      </div>
     );
   }
 }

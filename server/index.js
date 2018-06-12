@@ -155,14 +155,36 @@ app.post('/launchEditor/', (req, res) => {
       res.end();
     } else {
       var hash = result[0].hash
+      console.log('hash: ', hash)
       var url = `https://ipfs.io/ipfs/${hash}`
+      var awsurl = 'https://s3-us-west-2.amazonaws.com/myabx/1/zinia.docx?versionId=null'
+      // var url = `localhost:8080/ipfs/${hash}`
+      // var prefix = '/ip4/127.0.0.1/tcp/5001'
       const zoho = require('./config.js').editor.apikey;
-      request(`https://writer.zoho.com/writer/remotedoc.im?url=${url}&apikey=${zoho}`, { json: true }, (err, response, body) => {
+      request(`https://writer.zoho.com/writer/remotedoc.im?url=${url}&saveurl=${awsurl}&mode=collabedit&apikey=${zoho}`, { json: true }, (err, response, body) => {
         if (err) { return console.log(err); }
         var arr = body.split('=');
         var body = arr[1] + '=' + arr[2].slice(0, -7);
         res.status(200).json(body)
       });
+
+      // var url1 = `https://ipfs.io/ipfs/QmeF2Pywk2X1FrgcZQokYEBKZsZT4EnB2hStRDB1AczQWB`
+      // var url2 = `https://ipfs.io/ipfs/QmeKBxiUATszfnftZYVkkVqC4odxqpneXxk1BFoEcbn7nm`
+      // var content1 = `/Users/adellehousker/legacy/AbleBoxPro/policydocs/zinia.docx`
+      // var content2 = `/Users/adellehousker/legacy/AbleBoxPro/policydocs/zinnia.docx`
+      // request(`https://writer.zoho.com/writer/v1/remote/comparedocs?doc1=${content1}&doc2=${content2}&apikey=${zoho}`, { json: true }, (err, response, body) => {
+      //   // if (err) { return console.log(err); }
+      //   console.log('arguments: ', arguments)
+      //   console.log('err: ', err)
+      //   console.log('response: ', response)
+      //   console.log('body: ', body)
+      //   res.status(200).json(body)
+      // });
+
+
+
+
+
     };
   });
 });

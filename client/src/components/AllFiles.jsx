@@ -91,6 +91,10 @@ class AllFiles extends React.Component {
     reader.onloadend = () => {
       this.saveToIpfs(reader, files);
     }
+    // files.forEach(file => file.upload = true);
+    // this.setState({
+    //   files: [...this.state.files].concat(files),
+    // });
   }
 
   saveToIpfs(reader, files) {
@@ -98,6 +102,7 @@ class AllFiles extends React.Component {
     const buffer = Buffer.from(reader.result)
     this.ipfsApi.add(buffer, { progress: (prog) => console.log(`received: ${prog}`) })
     .then((response) => {
+      console.log('ipfs response: ', response)
       ipfsId = response[0].hash
       var fileLocation = 'https://ipfs.io/ipfs/' + ipfsId
       files.forEach(file => {
