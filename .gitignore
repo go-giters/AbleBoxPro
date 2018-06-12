@@ -67,9 +67,7 @@ client/dist/*
 # config files
 server/config.js
 
-<<<<<<< HEAD
 # local  mysql database
 server/db/index.js
-=======
+
 package-lock.json
->>>>>>> b2bdede312ca0a8581b77e5e4fa0862d75f74439
