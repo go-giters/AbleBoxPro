@@ -6,7 +6,7 @@ import { withRouter } from 'react-router-dom';
 import { Row, Col, Input, Button, Modal, ModalHeader, ModalBody, ModalFooter} from 'reactstrap';
 import css from 'Src/styles/AllFiles.css';
 import Search from 'Src/components/Search.jsx';
-import $ from "jquery";
+import $ from 'jquery';
 import createFolderIcon from 'Src/assets/createFolder.png';
 import { debounce } from 'lodash';
 import ipfsAPI from 'ipfs-api';
@@ -35,6 +35,7 @@ class AllFiles extends React.Component {
     this.handleClickDelete = this.handleClickDelete.bind(this);
     this.toggle = this.toggle.bind(this);
     this.saveToIpfs = this.saveToIpfs.bind(this);
+    this.getFiles = this.getFiles.bind(this);
   }
 
   componentDidMount() {
@@ -47,11 +48,11 @@ class AllFiles extends React.Component {
       url: '/getfiles',
       contentType: 'application/json; charset=utf-8',
       success: (data, textStatus, jqXHR) => {
-        console.log(JSON.parse(data))
+        console.log(JSON.parse(data));
         this.setState({
           files: JSON.parse(data).result,
           path: JSON.parse(data).path
-        })
+        });
       },
       error: function(XMLHttpRequest, textStatus, errorThrown) {
         alert(errorThrown); // need to decide on what we are doing here with the error
@@ -214,7 +215,10 @@ class AllFiles extends React.Component {
         <Path path = {this.state.path}/>
         <Dropzone files={this.state.files} handleFiles={this.handleFiles} searchMode={this.state.searchMode}>
           {this.state.files.length
-            ? this.state.files.map((file, i) => <FileListEntry key={file.id} file={file} handleClickDelete={this.handleClickDelete}/>)
+            ? this.state.files.map((file, i) => <FileListEntry key={file.id} file={file}
+              handleClickDelete={this.handleClickDelete}
+              getFiles={this.getFiles}
+            />)
             : null
           }
         </Dropzone>
@@ -225,7 +229,7 @@ class AllFiles extends React.Component {
           </Col>
         </Row>
       </React.Fragment>
-    )
+    );
   }
 }
 

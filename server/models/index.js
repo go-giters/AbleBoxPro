@@ -109,6 +109,17 @@ const getFiles = (folderId, userId, cb) => {
   });
 };
 
+const updateName = (name, id, cb) => {
+  const query = 'UPDATE files SET name = ? WHERE id = ?';
+  db.connection.query(query, [name, id], (err, result) => {
+    if (err) {
+      cb(err, null);
+    } else {
+      cb(null, result);
+    }
+  });
+};
+
 const verifyFileExistenceAndPermissions = (folderId, userId, cb) => {
   const query = 'SELECT id FROM files WHERE id = ? AND id <> 0 AND (user_id = ? OR is_public = 1)';
 
@@ -169,7 +180,7 @@ const searchPath = (userId, folderId, cb) => {
       cb(null, result);
     }
   });
-}
+};
 
 // data in this table is moved to collab once new user registers
 const shareFilePendingUser = (file, email, cb) => {
@@ -203,7 +214,7 @@ const shareFileExistingUser = (file, userId, cb) => {
       cb(null, result);
     }
   });
-}
+};
 
 exports.checkUserExists = checkUserExists;
 exports.createFile = createFile;
@@ -220,3 +231,4 @@ exports.shareFilePendingUser = shareFilePendingUser;
 exports.shareFileExistingUser = shareFileExistingUser;
 exports.verifyFileExistenceAndPermissions = verifyFileExistenceAndPermissions;
 exports.getHash = getHash;
+exports.updateName = updateName;
