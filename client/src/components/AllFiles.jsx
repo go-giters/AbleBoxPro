@@ -174,7 +174,7 @@ class AllFiles extends React.Component {
       <React.Fragment>
         <Row className="mt-3 no-gutters">
           <Col xs="10" sm="10" md="9" lg="8" className="mr-auto">
-           <Search searchHandler={this.searchHandler} handleKeyPress ={this.handleKeyPress} />
+            <Search searchHandler={this.searchHandler} handleKeyPress ={this.handleKeyPress} />
           </Col>
           <Col xs="auto">
             <img className="create-folder" background="transparent" src={createFolderIcon} alt="create folder" onClick={this.toggle}/>
@@ -193,7 +193,7 @@ class AllFiles extends React.Component {
         <Path path = {this.state.path}/>
         <Dropzone files={this.state.files} handleFiles={this.handleFiles} searchMode={this.state.searchMode}>
           {this.state.files.length
-            ? this.state.files.map((file, i) => <FileListEntry key={file.id} file={file}
+            ? this.state.files.map((file, i) => <FileListEntry key={file.id || i} file={file}
               handleClickDelete={this.handleClickDelete}
               getFiles={this.getFiles}
             />)
