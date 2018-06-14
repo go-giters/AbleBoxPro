@@ -13,12 +13,14 @@ import Rename from './Rename.jsx';
 class FileListEntry extends React.Component {
   constructor(props) {
     super(props);
-    
+
     this.state = {
       uploadProgress: 0,
-      upload: !!this.props.file.upload
+      upload: !!this.props.file.upload,
+      path: ''
     };
     this.handleDownload = this.handleDownload.bind(this);
+    this.getFilePath = this.getFilePath.bind(this);
   }
 
   handleDownload(e) {
@@ -72,13 +74,36 @@ class FileListEntry extends React.Component {
 
       req.send(formData);
     }
+    this.getFilePath(this.props.file.id);
+  }
+
+  getFilePath(id) {
+    $.ajax({
+      method: 'GET',
+      url: '/path',
+      data: {fileId: id},
+      dataType: 'json',
+      contentType: 'application/json; charset=utf-8',
+      success: (data) => {
+        let pathString = 'Home';
+        // console.log(this.props.file.id)
+        data.forEach((thing) => {
+          if (!(thing.folder_id === 0)){
+            pathString += '/' + thing.name;
+          }
+        });
+        this.setState({
+          path: pathString
+        });
+      }
+    });
   }
 
   render() {
     return (
       <Col xs="auto" className="file-list-entry py-3">
         <Row className="text-sm-center justify-content-center">
-          <Rename file={this.props.file} getFiles={this.props.getFiles}/>
+          <Rename file={this.props.file} getFiles={this.props.getFiles} getFilePath={this.getFilePath}/>
           <Col xs="12" sm="8" md="auto" className="mr-md-auto text-center text-sm-left">
             {this.props.file.is_folder
               ? <img width="32px" src={folderIcon} alt="folder icon"/>
@@ -117,7 +142,7 @@ class FileListEntry extends React.Component {
           : null
         }
         <Row noGutters={true}>
-          <Filepath file={this.props.file}/>
+          <Filepath path={this.state.path}/>
         </Row>
       </Col>
     );
