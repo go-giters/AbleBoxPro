@@ -3,7 +3,7 @@ import { Alert, Button, Row, Col, Progress } from 'reactstrap';
 import moment from 'moment';
 import $ from 'jquery';
 import Share from './Share.jsx';
-import fileIcon from '../assets/file.png';
+import prettyFileIcons from '../helper/pretty-file-icons';
 import folderIcon from '../assets/folder.png';
 import downloadIcon from '../assets/download.png';
 import css from '../styles/FileListEntry.css';
@@ -107,7 +107,7 @@ class FileListEntry extends React.Component {
           <Col xs="12" sm="8" md="auto" className="mr-md-auto text-center text-sm-left">
             {this.props.file.is_folder
               ? <img width="32px" src={folderIcon} alt="folder icon"/>
-              : <img width="32px" src={fileIcon} alt="file icon"/>
+              : <img width="32px" src={"/icons/" + prettyFileIcons.getIcon(this.props.file.name, "svg")} alt="file icon"/>
             }
             {this.props.file.is_folder
               ? <span className="file-name align-middle ml-2 text-left"><a href={'/folder/' + this.props.file.id }>{this.props.file.name}</a></span>

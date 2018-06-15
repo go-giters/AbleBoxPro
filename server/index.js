@@ -122,6 +122,7 @@ app.use(function(req, res, next) {
   next();
 });
 
+app.use('/icons', express.static(__dirname + '/../client/src/assets/svg'));
 app.use(express.static(__dirname + '/../client/dist'));
 app.use(session({
   secret: 'keyboard cat',
