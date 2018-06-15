@@ -68,3 +68,4 @@ client/dist/*
 server/config.js
 
 package-lock.json
+*.DS_STORE
