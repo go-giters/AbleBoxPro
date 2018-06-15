@@ -323,9 +323,9 @@ app.post('/createFolder', createFolder, function(req, res) {
   });
 });
 
-app.get('/download', function(req, res, next) {
+app.get('/download/:id', function(req, res, next) {
   // download the file via aws s3 here
-  db.getKey(req.query.id, function (err, result) {
+  db.getKey(req.params.id, function(err, result) {
     var filename;
     if (err) {
       res.status = 404;
@@ -345,20 +345,24 @@ app.get('/download', function(req, res, next) {
           console.error(err);
           return next();
         }
-        var file = fs.createWriteStream(os.homedir() + '/Downloads/' + filename);
+        // var file = fs.createWriteStream(os.homedir() + '/Downloads/' + filename);
         var stream = s3.getObject(options).createReadStream();
 
-        res.setHeader('Content-Type', data.ContentType);
-        res.setHeader('Content-Disposition', 'attachment;', 'filename=' + filename);
-        res.setHeader('Content-Length', data.ContentLength);
+        // res.setHeader('Content-Type', data.ContentType);
+        // res.setHeader('Content-Disposition', 'attachment;', 'filename=' + filename);
+        // res.setHeader('filename', filename)
+        // res.setHeader('Content-Length', data.ContentLength);
 
-        stream.on('data', (data) => {
-          file.write(data);
-        }).on('end', function () {
-          file.end();
-          file.close();
-          res.send(file.path);
-        });
+        // stream.on('data', (data) => {
+        //   file.write(data);
+        // }).on('end', function () {
+        //   file.end();
+        //   file.close();
+        //   res.send(file.path);
+        // });
+
+        stream.pipe(res);
+        // stream.on('end', res.end)
       });
     };
   });

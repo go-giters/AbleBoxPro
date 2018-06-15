@@ -9,6 +9,7 @@ import Search from 'Src/components/Search.jsx';
 import $ from "jquery";
 import createFolderIcon from 'Src/assets/createFolder.png';
 import { debounce } from 'lodash';
+import os from 'os';
 
 
 
