@@ -44,6 +44,7 @@ class Rename extends React.Component {
       success: () => {
         this.toggle();
         this.props.getFiles();
+        this.props.getFilePath(id);
       },
       error: function(XMLHttpRequest, textStatus, errorThrown) {
         alert('handlerename error: ' + errorThrown);

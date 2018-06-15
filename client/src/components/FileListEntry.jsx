@@ -3,7 +3,7 @@ import { Alert, Button, Row, Col, Progress, Modal } from 'reactstrap';
 import moment from 'moment';
 import $ from 'jquery';
 import Share from './Share.jsx';
-import fileIcon from '../assets/file.png';
+import prettyFileIcons from '../helper/pretty-file-icons';
 import folderIcon from '../assets/folder.png';
 import downloadIcon from '../assets/download.png';
 import css from '../styles/FileListEntry.css';
@@ -20,11 +20,13 @@ class FileListEntry extends React.Component {
 			upload: !!this.props.file.upload,
       loadingEditor: false,
       modal: false,
-      url: ''
+      url: '',
+      path: ''
 		};
 		this.handleDownload = this.handleDownload.bind(this);
     this.launchEditor = this.launchEditor.bind(this);
     this.toggle = this.toggle.bind(this);
+    this.getFilePath = this.getFilePath.bind(this);
 	}
 
   handleDownload(e) {
@@ -81,6 +83,29 @@ class FileListEntry extends React.Component {
 
       req.send(formData);
     }
+    this.getFilePath(this.props.file.id);
+  }
+
+  getFilePath(id) {
+    $.ajax({
+      method: 'GET',
+      url: '/path',
+      data: {fileId: id},
+      dataType: 'json',
+      contentType: 'application/json; charset=utf-8',
+      success: (data) => {
+        let pathString = 'Home';
+        // console.log(this.props.file.id)
+        data.forEach((thing) => {
+          if (!(thing.folder_id === 0)){
+            pathString += '/' + thing.name;
+          }
+        });
+        this.setState({
+          path: pathString
+        });
+      }
+    });
   }
 
   launchEditor() {
@@ -121,11 +146,11 @@ class FileListEntry extends React.Component {
       <Col xs="auto" className="file-list-entry py-3">
         <Row className="text-sm-center justify-content-center">
         {this.state.loadingEditor && <img src={loadicon}></img>}
-          <Rename file={this.props.file} getFiles={this.props.getFiles}/>
+          <Rename file={this.props.file} getFiles={this.props.getFiles} getFilePath={this.getFilePath}/>
           <Col xs="12" sm="8" md="auto" className="mr-md-auto text-center text-sm-left">
             {this.props.file.is_folder
               ? <img width="32px" src={folderIcon} alt="folder icon"/>
-              : <img width="32px" src={fileIcon} alt="file icon"/>
+              : <img width="32px" src={"/icons/" + prettyFileIcons.getIcon(this.props.file.name, "svg")} alt="file icon"/>
             }
             {this.props.file.is_folder
               ? <span className="file-name align-middle ml-2 text-left"><a href={'/folder/' + this.props.file.id }>{this.props.file.name}</a></span>
@@ -160,7 +185,7 @@ class FileListEntry extends React.Component {
           : null
         }
         <Row noGutters={true}>
-          <Filepath file={this.props.file}/>
+          <Filepath path={this.state.path}/>
         </Row>
       </Col>
       </div>
