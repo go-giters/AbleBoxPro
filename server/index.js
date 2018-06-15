@@ -432,11 +432,28 @@ app.put('/updateName', function(req, res) {
 
 app.post('/createFolder', createFolder, function(req, res) {
   db.createFolder(req, function(err, result) {
+    console.log('inside db.createFolder!!!')
     if (err) {
       res.status = 404;
       res.write('UNABLE TO CREATE FOLDER');
       res.end();
     } else {
+      console.log('this is the result from db.createFolder: ', result)
+      res.status = 200;
+      res.write(JSON.stringify({folder_id: result.insertId}));
+      res.end();
+    }
+  });
+});
+
+app.post('/moveFile', createFolder, function(req, res) {
+  db.moveFile(req.body.folder, req.body.id, function(err, result) {
+    if (err) {
+      res.status = 404;
+      res.write('UNABLE TO CREATE FOLDER');
+      res.end();
+    } else {
+      console.log('this is the result from db.moveFile: ', result)
       res.status = 200;
       res.write(JSON.stringify({folder_id: result.insertId}));
       res.end();

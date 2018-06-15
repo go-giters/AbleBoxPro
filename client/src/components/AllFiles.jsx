@@ -51,7 +51,14 @@ class AllFiles extends React.Component {
       url: '/getfiles',
       contentType: 'application/json; charset=utf-8',
       success: (data, textStatus, jqXHR) => {
-        console.log(JSON.parse(data));
+        console.log('inside getFiles data: ', data)
+        let dataObj = JSON.parse(data);
+        console.log('dataObj: ', dataObj)
+        dataObj.result.forEach(file => {
+          let el = document.getElementById(file.id)
+          console.log('el: ', el)
+          // new Draggable(el)
+        })
         this.setState({
           files: JSON.parse(data).result,
           path: JSON.parse(data).path
@@ -69,8 +76,7 @@ class AllFiles extends React.Component {
       url: '/getfolders',
       contentType: 'application/json; charset=utf-8',
       success: (data, textStatus, jqXHR) => {
-        console.log('data: ', data)
-        console.log(JSON.parse(data));
+        console.log('inside getAllFolders data: ', data)
         this.setState({
           allFolders: JSON.parse(data).result
         });

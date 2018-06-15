@@ -9,7 +9,7 @@ import downloadIcon from '../assets/download.png';
 import css from '../styles/FileListEntry.css';
 import Filepath from './Filepath.jsx';
 import Rename from './Rename.jsx';
-import loadicon from 'Src/assets/loader.gif'
+import loadicon from 'Src/assets/loader.gif';
 
 class FileListEntry extends React.Component {
 	constructor(props) {
@@ -49,6 +49,7 @@ class FileListEntry extends React.Component {
   }
 
 	componentDidMount() {
+    let el = this.refs[this.props.file.id.toString()];
 		if (this.state.upload) {
       console.log('this.props.file: ', this.props.file)
 
@@ -184,6 +185,38 @@ class FileListEntry extends React.Component {
     }
   }
 
+  drag(e) {
+    e.dataTransfer.setData("id", e.target.id);
+  }
+
+  drop(e) {
+    e.preventDefault();
+    let data = {
+      id: e.dataTransfer.getData("id"),
+      folder: e.target.id
+    }
+    console.log('data inside FileListEntry drop: ', data)
+    $.ajax ({
+      type: 'POST',
+      url: '/moveFile',
+      data: data,
+      success: (data, textStatus, jqXHR) => {
+        console.log('data: ', data)
+        this.setState({
+          loadingEditor: false
+        }, () => window.open(data));
+      },
+      error: function(XMLHttpRequest, textStatus, errorThrown) {
+        this.setState({loadingEditor: false})
+        console.error("DOWNLOAD ERROR", errorThrown);
+      },
+    });
+
+
+
+    //update folder_id of id=data so that folder_id=
+  }
+
   toggle() {
     this.setState({
       modal: !this.state.modal
@@ -203,8 +236,8 @@ class FileListEntry extends React.Component {
           <Rename file={this.props.file} getFiles={this.props.getFiles} getFilePath={this.getFilePath}/>
           <Col xs="12" sm="8" md="auto" className="mr-md-auto text-center text-sm-left">
             {this.props.file.is_folder
-              ? <img width="32px" src={folderIcon} alt="folder icon"/>
-              : <img width="32px" src={"/icons/" + prettyFileIcons.getIcon(this.props.file.name, "svg")} alt="file icon"/>
+              ? <img ref={this.props.file.id} id={this.props.file.id} width="32px" src={folderIcon} alt="folder icon" onDragStart={this.drag} onDrop={this.drop}/>
+              : <img ref={this.props.file.id} id={this.props.file.id} width="32px" src={"/icons/" + prettyFileIcons.getIcon(this.props.file.name, "svg")} alt="file icon" onDragStart={this.drag}/>
             }
             {this.props.file.is_folder
               ? <span className="file-name align-middle ml-2 text-left"><a href={'/folder/' + this.props.file.id }>{this.props.file.name}</a></span>
