@@ -14,6 +14,8 @@ const { Writable } = require('stream');
 var FileSaver = require('file-saver');
 const os = require('os');
 
+var request = require('request');
+
 var multer = require('multer');
 var multerS3 = require('multer-s3');
 const ABLEBOX_BUCKET = require('./config.js').bucketName;
@@ -76,6 +78,7 @@ var getObject = function(objectKey, cb) {
 }
 
 var upload = multer({
+  preservePath: true,
   storage: multerS3({
     s3: s3,
     bucket: ABLEBOX_BUCKET,
@@ -142,6 +145,49 @@ var checkUser = (req, res, next) => {
 app.get('/home', checkUser, (req, res) => {
   req.session.folderId = 0;
   res.sendFile(path.resolve(__dirname + '/../client/dist/index.html'));
+});
+
+app.post('/launchEditor/', (req, res) => {
+  db.getHash(req.body.id, function (err, result) {
+    if (err) {
+      res.status = 404;
+      //must refresh or this error will be thrown
+      res.write(err);
+      res.end();
+    } else {
+      var hash = result[0].hash
+      console.log('hash: ', hash)
+      var url = `https://ipfs.io/ipfs/${hash}`
+      var awsurl = 'https://s3-us-west-2.amazonaws.com/myabx/1/zinia.docx?versionId=null'
+      // var url = `localhost:8080/ipfs/${hash}`
+      // var prefix = '/ip4/127.0.0.1/tcp/5001'
+      const zoho = require('./config.js').editor.apikey;
+      request(`https://writer.zoho.com/writer/remotedoc.im?url=${url}&saveurl=${awsurl}&mode=collabedit&apikey=${zoho}`, { json: true }, (err, response, body) => {
+        if (err) { return console.log(err); }
+        var arr = body.split('=');
+        var body = arr[1] + '=' + arr[2].slice(0, -7);
+        res.status(200).json(body)
+      });
+
+      // var url1 = `https://ipfs.io/ipfs/QmeF2Pywk2X1FrgcZQokYEBKZsZT4EnB2hStRDB1AczQWB`
+      // var url2 = `https://ipfs.io/ipfs/QmeKBxiUATszfnftZYVkkVqC4odxqpneXxk1BFoEcbn7nm`
+      // var content1 = `/Users/adellehousker/legacy/AbleBoxPro/policydocs/zinia.docx`
+      // var content2 = `/Users/adellehousker/legacy/AbleBoxPro/policydocs/zinnia.docx`
+      // request(`https://writer.zoho.com/writer/v1/remote/comparedocs?doc1=${content1}&doc2=${content2}&apikey=${zoho}`, { json: true }, (err, response, body) => {
+      //   // if (err) { return console.log(err); }
+      //   console.log('arguments: ', arguments)
+      //   console.log('err: ', err)
+      //   console.log('response: ', response)
+      //   console.log('body: ', body)
+      //   res.status(200).json(body)
+      // });
+
+
+
+
+
+    };
+  });
 });
 
 app.post('/login', (req, res) => {
@@ -238,6 +284,7 @@ app.get('/folder/:folderId', (req, res) => {
 });
 
 app.get('/getfiles', function(req, res) {
+
   let folderId = req.session.folderId;
   let userId = req.session.user;
   db.getFiles(folderId, userId, function(err, result) {
@@ -257,6 +304,26 @@ app.get('/getfiles', function(req, res) {
       });
     }
   });
+});
+
+app.get('/getfolders', function(req, res) {
+  let folderId = req.session.folderId;
+  let userId = req.session.user;
+  db.getAllFolders(function(err, result) {
+    if (err) {
+      res.status = 404;
+      res.write(JSON.stringify(err));
+      res.end();
+    } else {
+      console.log('result in getfolders: ', result)
+      res.status = 200;
+        let data = {
+          'result': result
+        }
+        res.write(JSON.stringify(data));
+        res.end();
+      };
+    });
 });
 
 app.get('/path', (req, res) => {
@@ -362,6 +429,7 @@ app.get('/download', function(req, res, next) {
           console.error(err);
           return next();
         }
+        console.log('first data: ', data)
         var file = fs.createWriteStream(os.homedir() + '/Downloads/' + filename);
         var stream = s3.getObject(options).createReadStream();
 

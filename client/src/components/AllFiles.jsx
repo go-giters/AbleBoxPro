@@ -9,7 +9,7 @@ import Search from 'Src/components/Search.jsx';
 import $ from 'jquery';
 import createFolderIcon from 'Src/assets/createFolder.png';
 import { debounce } from 'lodash';
-
+import ipfsAPI from 'ipfs-api';
 
 
 class AllFiles extends React.Component {
@@ -17,10 +17,14 @@ class AllFiles extends React.Component {
     super(props);
 
     this.state = {
+      files: null,
       searchMode: false,
       folderName: '',
-      path: []
+      path: [],
+      allFolders: null
     };
+
+    this.ipfsApi = ipfsAPI('localhost', '5001')
 
     this.handleClick = this.handleClick.bind(this);
     this.handleFiles = this.handleFiles.bind(this);
@@ -28,16 +32,17 @@ class AllFiles extends React.Component {
     this.handleTitleChange = this.handleTitleChange.bind(this);
     this.handleKeyPress = this.handleKeyPress.bind(this);
     this.createFolder = this.createFolder.bind(this);
-    this.handleClick = this.handleClick.bind(this);
-    this.handleFiles = this.handleFiles.bind(this);
     this.searchHandler = debounce(this.searchHandler.bind(this), 500);
     this.handleClickDelete = this.handleClickDelete.bind(this);
     this.toggle = this.toggle.bind(this);
+    this.saveToIpfs = this.saveToIpfs.bind(this);
     this.getFiles = this.getFiles.bind(this);
+    this.getAllFolders = this.getAllFolders.bind(this);
   }
 
   componentDidMount() {
     this.getFiles();
+    this.getAllFolders();
   }
 
   getFiles() {
@@ -58,16 +63,59 @@ class AllFiles extends React.Component {
     });
   }
 
+  getAllFolders() {
+    $.ajax ({
+      type: 'GET',
+      url: '/getfolders',
+      contentType: 'application/json; charset=utf-8',
+      success: (data, textStatus, jqXHR) => {
+        console.log('data: ', data)
+        console.log(JSON.parse(data));
+        this.setState({
+          allFolders: JSON.parse(data).result
+        });
+      },
+      error: function(XMLHttpRequest, textStatus, errorThrown) {
+        alert(errorThrown); // need to decide on what we are doing here with the error
+      },
+    });
+  }
+
   handleClick() {
     document.querySelector('#upload').click();
   }
 
   handleFiles(files) {
-    // add upload key to trigger upload upon FileListEntry mount
-    files.forEach(file => file.upload = true);
-    this.setState({
-      files: [...this.state.files].concat(files),
-    });
+    let reader = new window.FileReader()
+    reader.readAsArrayBuffer(files[0])
+    reader.onloadend = () => {
+      this.saveToIpfs(reader, files);
+    }
+    // files.forEach(file => file.upload = true);
+    // this.setState({
+    //   files: [...this.state.files].concat(files),
+    // });
+  }
+
+  saveToIpfs(reader, files) {
+    let ipfsId
+    const buffer = Buffer.from(reader.result)
+    this.ipfsApi.add(buffer, { progress: (prog) => console.log(`received: ${prog}`) })
+    .then((response) => {
+      console.log('ipfs response: ', response)
+      ipfsId = response[0].hash
+      var fileLocation = 'https://ipfs.io/ipfs/' + ipfsId
+      files.forEach(file => {
+        file.upload = true;
+        file.hash = ipfsId
+        console.log('file: ', file)
+      });
+      this.setState({
+        files: [...this.state.files].concat(files),
+      });
+    }).catch((err) => {
+      console.error(err)
+    })
   }
 
   searchHandler(value) {

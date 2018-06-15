@@ -44,12 +44,14 @@ const fetchUser = (email, cb) => {
 };
 
 const createFile = (req, cb) => {
+  console.log('req.body inside db.createFile: ', req.body)
   const fileDetails = {
     name: req.file.originalname,
     folder_id: req.session.folderId,
     file_ext: req.file.contentType,
     user_id: req.session.user,
-    s3_objectId: req.file.key
+    s3_objectId: req.file.key,
+    hash: req.body.body
   };
 
   const query = 'INSERT INTO files SET ?';
@@ -107,6 +109,18 @@ const getFiles = (folderId, userId, cb) => {
   });
 };
 
+const getAllFolders = (cb) => {
+  const query = 'SELECT id, name, s3_objectId, is_public, created_on as lastModified, is_folder FROM files WHERE is_folder = 1 ORDER BY is_folder DESC, name';
+
+  db.connection.query(query, (err, result, fields) => {
+    if (err) {
+      cb(err, null);
+    } else {
+      cb(null, result);
+    }
+  });
+};
+
 const updateName = (name, id, cb) => {
   const query = 'UPDATE files SET name = ? WHERE id = ?';
   db.connection.query(query, [name, id], (err, result) => {
@@ -132,6 +146,18 @@ const verifyFileExistenceAndPermissions = (folderId, userId, cb) => {
 
 const getKey = (id, cb) => {
   const query = 'SELECT name, s3_objectId FROM files WHERE id=?';
+
+  db.connection.query(query, id, (err, result, fields) => {
+    if (err) {
+      cb(err, null);
+    } else {
+      cb(null, result);
+    }
+  });
+};
+
+const getHash = (id, cb) => {
+  const query = 'SELECT hash, s3_objectId FROM files WHERE id=?';
 
   db.connection.query(query, id, (err, result, fields) => {
     if (err) {
@@ -216,4 +242,6 @@ exports.searchPath = searchPath;
 exports.shareFilePendingUser = shareFilePendingUser;
 exports.shareFileExistingUser = shareFileExistingUser;
 exports.verifyFileExistenceAndPermissions = verifyFileExistenceAndPermissions;
+exports.getHash = getHash;
 exports.updateName = updateName;
+exports.getAllFolders = getAllFolders;

@@ -25,6 +25,7 @@
 5. Run npm run react-dev from your Git Bash from this directory
 6. Open another Git Bash terminal and execute: npm run server-dev from this directory
 7. Go to the browser and copy paste: http://127.0.0.1:3000/
+8. To utilize blockchain encrypted storage of files (ipfs): "npm run ipfs-dev"
 
 ## Road Map
 
