@@ -111,23 +111,77 @@ class FileListEntry extends React.Component {
   launchEditor() {
     this.setState({loadingEditor: true})
     let data = {id: this.props.file.id};
-    $.ajax ({
-      type: 'POST',
-      url: '/launchEditor',
-      data: data,
-      success: (data, textStatus, jqXHR) => {
-        console.log('data: ', data)
-        this.setState({
-          loadingEditor: false
-          //uncomment to enable modal:
-          // modal: true,
-          // url: data
-        }, () => window.open(data));
-      },
-      error: function(XMLHttpRequest, textStatus, errorThrown) {
-        console.error("DOWNLOAD ERROR", errorThrown);
-      },
-    });
+    console.log('this.props.file: ', this.props.file)
+    var writer = this.props.file.name.match(/\.(doc|docx|rtf|txt|odt|html|swx)$/i)
+    var sheet = this.props.file.name.match(/\.(xlsx|xls|ods|sxc|csv|tsv)$/i)
+    var show = this.props.file.name.match(/\.(ppt|pptx|ppsx|odp|sxi)$/i)
+    console.log('writer: ', writer)
+    console.log('sheet: ', sheet)
+
+    if(writer) {
+      $.ajax ({
+        type: 'POST',
+        url: '/launchWriter',
+        data: data,
+        success: (data, textStatus, jqXHR) => {
+          console.log('data: ', data)
+          this.setState({
+            loadingEditor: false
+            //uncomment to enable modal:
+            // modal: true,
+            // url: data
+          }, () => window.open(data));
+        },
+        error: function(XMLHttpRequest, textStatus, errorThrown) {
+          this.setState({loadingEditor: false})
+          console.error("DOWNLOAD ERROR", errorThrown);
+        },
+      });
+    } else if(sheet) {
+      console.log('Inside sheet')
+      $.ajax ({
+        type: 'POST',
+        url: '/launchSheet',
+        data: data,
+        success: (data, textStatus, jqXHR) => {
+          console.log('data: ', data)
+          this.setState({
+            loadingEditor: false
+            //uncomment to enable modal:
+            // modal: true,
+            // url: data
+          }, () => window.open(data));
+        },
+        error: function(XMLHttpRequest, textStatus, errorThrown) {
+          this.setState({loadingEditor: false})
+          console.error("DOWNLOAD ERROR", errorThrown);
+        },
+      });
+    }
+    // else if(show) {
+    //   console.log("u have ppt")
+    //   $.ajax ({
+    //     type: 'POST',
+    //     url: '/launchShow',
+    //     data: data,
+    //     success: (data, textStatus, jqXHR) => {
+    //       console.log('data: ', data)
+    //       this.setState({
+    //         loadingEditor: false
+    //         //uncomment to enable modal:
+    //         // modal: true,
+    //         // url: data
+    //       }, () => window.open(data));
+    //     },
+    //     error: function(XMLHttpRequest, textStatus, errorThrown) {
+    //       console.error("DOWNLOAD ERROR", errorThrown);
+    //     },
+    //   });
+    // }
+    else {
+      this.setState({loadingEditor: false})
+      window.alert('File format not supported by editor')
+    }
   }
 
   toggle() {
