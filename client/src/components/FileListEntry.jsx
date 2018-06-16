@@ -8,6 +8,9 @@ import folderIcon from '../assets/folder.png';
 import downloadIcon from '../assets/download.png';
 import css from '../styles/FileListEntry.css';
 import Filepath from './Filepath.jsx';
+import {Readable} from 'stream';
+import download from 'downloadjs';
+import { StringDecoder } from 'string_decoder';
 import Rename from './Rename.jsx';
 import loadicon from 'Src/assets/loader.gif';
 
@@ -29,23 +32,35 @@ class FileListEntry extends React.Component {
     this.getFilePath = this.getFilePath.bind(this);
 	}
 
-  handleDownload(e) {
-    let data = {id: this.props.file.id};
 
-    $.ajax ({
-      type: 'GET',
-      url: '/download',
-      data: data,
-      contentType: 'image/png',
-      success: (data, textStatus, jqXHR) => {
-        this.setState({
-          message: 'File has been downloaded to: ' + data,
-        });
-      },
-      error: function(XMLHttpRequest, textStatus, errorThrown) {
-        console.error('DOWNLOAD ERROR', errorThrown);
-      },
-    });
+	handleDownload(e) {
+    let url = '/download/' + this.props.file.id;
+    let name = this.props.file.name
+    console.log(this.props.file)
+
+    fetch(url).then(response => {
+      const header = response.headers;
+      const reader = response.body.getReader();
+      console.log(header);
+      let fileArray = [];
+      reader.read().then(process = ({done, value}) => {
+
+        if (done) {
+          return
+        };
+
+        value.forEach(byte => fileArray.push(byte))
+
+        return reader.read().then(process);
+
+      }).then(() => {
+        let file = new Uint8Array(fileArray)
+
+        download(file, name);
+        console.log('All done!');
+
+      });
+    })
   }
 
 	componentDidMount() {
@@ -250,8 +265,11 @@ class FileListEntry extends React.Component {
             <span className="timestamp align-middle">{moment(this.props.file.lastModified).format('MM/DD/YY h:mm a')}</span>
           </Col>
           <Col xs="auto" className={'mt-3 mt-sm-4 mt-md-0 ' + (this.props.file.is_folder ? 'd-none d-md-block' : '')}>
-            <Button className={'btn btn-sm btn-outline-secondary shadow-sm ' + (this.props.file.is_folder ? 'invisible' : '')} onClick={this.handleDownload} type="download">
-              <img background="transparent" src={downloadIcon} alt="Download"/>
+            <Button
+              className={'btn btn-sm btn-outline-secondary shadow-sm ' + (this.props.file.is_folder ? 'invisible' : '')}
+              onClick={this.handleDownload}
+              type="download" >
+              <img background="transparent" src={downloadIcon} alt="Download" />
             </Button>
           </Col>
           <Col xs="auto" className="mt-3 mt-sm-4 mt-md-0">

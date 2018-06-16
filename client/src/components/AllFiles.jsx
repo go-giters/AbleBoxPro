@@ -51,6 +51,7 @@ class AllFiles extends React.Component {
       url: '/getfiles',
       contentType: 'application/json; charset=utf-8',
       success: (data, textStatus, jqXHR) => {
+
         // console.log('inside getFiles data: ', data)
         // let dataObj = JSON.parse(data);
         // console.log('dataObj: ', dataObj)

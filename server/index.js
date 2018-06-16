@@ -13,9 +13,7 @@ var fs = require('fs');
 const { Writable } = require('stream');
 var FileSaver = require('file-saver');
 const os = require('os');
-
 var request = require('request');
-
 var multer = require('multer');
 var multerS3 = require('multer-s3');
 const ABLEBOX_BUCKET = require('./config.js').bucketName;
@@ -462,9 +460,9 @@ app.post('/moveFile', createFolder, function(req, res) {
   });
 });
 
-app.get('/download', function(req, res, next) {
+app.get('/download/:id', function(req, res, next) {
   // download the file via aws s3 here
-  db.getKey(req.query.id, function (err, result) {
+  db.getKey(req.params.id, function(err, result) {
     var filename;
     if (err) {
       res.status = 404;
@@ -475,7 +473,7 @@ app.get('/download', function(req, res, next) {
       filename = result[0].name;
       var options = {
         Bucket: ABLEBOX_BUCKET,
-        Key: fileKey,
+        Key: fileKey
       };
 
       s3.headObject(options, (err, data) => {
@@ -484,21 +482,8 @@ app.get('/download', function(req, res, next) {
           console.error(err);
           return next();
         }
-        console.log('first data: ', data)
-        var file = fs.createWriteStream(os.homedir() + '/Downloads/' + filename);
-        var stream = s3.getObject(options).createReadStream();
 
-        res.setHeader('Content-Type', data.ContentType);
-        res.setHeader('Content-Disposition', 'attachment;', 'filename=' + filename);
-        res.setHeader('Content-Length', data.ContentLength);
-
-        stream.on('data', (data) => {
-          file.write(data);
-        }).on('end', function () {
-          file.end();
-          file.close();
-          res.send(file.path);
-        });
+        var stream = s3.getObject(options).createReadStream().pipe(res);
       });
     };
   });
