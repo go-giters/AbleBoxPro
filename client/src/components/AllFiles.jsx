@@ -51,7 +51,6 @@ class AllFiles extends React.Component {
       url: '/getfiles',
       contentType: 'application/json; charset=utf-8',
       success: (data, textStatus, jqXHR) => {
-        console.log(JSON.parse(data));
         this.setState({
           files: JSON.parse(data).result,
           path: JSON.parse(data).path
@@ -69,8 +68,6 @@ class AllFiles extends React.Component {
       url: '/getfolders',
       contentType: 'application/json; charset=utf-8',
       success: (data, textStatus, jqXHR) => {
-        console.log('data: ', data)
-        console.log(JSON.parse(data));
         this.setState({
           allFolders: JSON.parse(data).result
         });

@@ -9,7 +9,6 @@ import downloadIcon from '../assets/download.png';
 import css from '../styles/FileListEntry.css';
 import Filepath from './Filepath.jsx';
 import {Readable} from 'stream';
-// import fileDownload from 'js-file-download';
 import download from 'downloadjs';
 import { StringDecoder } from 'string_decoder';
 import Rename from './Rename.jsx';
@@ -40,51 +39,28 @@ class FileListEntry extends React.Component {
     console.log(this.props.file)
 
     fetch(url).then(response => {
+      const header = response.headers;
       const reader = response.body.getReader();
-      // const decoder = new StringDecoder('utf8');
+      console.log(header);
+      let fileArray = [];
+      reader.read().then(process = ({done, value}) => {
 
-      let file = [];
-      reader.read().then(function process(result) {
-
-        if (result.done) {
+        if (done) {
           return
         };
 
-        // let text = decoder.write(result.value);
-
-
-        if (file.length === 0){
-          file = result;
-          console.log(file);
-        } else {
-          file += text;
-          console.log(file);
-        }
-
-        // console.log(text);
+        value.forEach(byte => fileArray.push(byte))
 
         return reader.read().then(process);
 
       }).then(() => {
+        let file = new Uint8Array(fileArray)
 
         download(file, name);
         console.log('All done!');
 
       });
     })
-    // $.ajax ({
-    //   type: 'GET',
-    //   url: '/download',
-    //   data: data,
-    //   // contentType: 'image/png',
-    //   success: (responseData, textStatus, jqXHR) => {
-    //     responseData
-
-    //   },
-    //   error: function(XMLHttpRequest, textStatus, errorThrown) {
-    //     console.error("DOWNLOAD ERROR", errorThrown);
-    //   },
-    // });
   }
 
 	componentDidMount() {
