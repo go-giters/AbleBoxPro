@@ -64,6 +64,7 @@ class FileListEntry extends React.Component {
   }
 
 	componentDidMount() {
+    // let el = this.refs[this.props.file.id.toString()];
 		if (this.state.upload) {
       console.log('this.props.file: ', this.props.file)
 
@@ -126,23 +127,111 @@ class FileListEntry extends React.Component {
   launchEditor() {
     this.setState({loadingEditor: true})
     let data = {id: this.props.file.id};
+    console.log('this.props.file: ', this.props.file)
+    var writer = this.props.file.name.match(/\.(doc|docx|rtf|txt|odt|html|swx)$/i)
+    var sheet = this.props.file.name.match(/\.(xlsx|xls|ods|sxc|csv|tsv)$/i)
+    var show = this.props.file.name.match(/\.(ppt|pptx|ppsx|odp|sxi)$/i)
+    console.log('writer: ', writer)
+    console.log('sheet: ', sheet)
+
+    if(writer) {
+      $.ajax ({
+        type: 'POST',
+        url: '/launchWriter',
+        data: data,
+        success: (data, textStatus, jqXHR) => {
+          console.log('data: ', data)
+          this.setState({
+            loadingEditor: false
+            //uncomment to enable modal:
+            // modal: true,
+            // url: data
+          }, () => window.open(data));
+        },
+        error: function(XMLHttpRequest, textStatus, errorThrown) {
+          this.setState({loadingEditor: false})
+          console.error("DOWNLOAD ERROR", errorThrown);
+        },
+      });
+    } else if(sheet) {
+      console.log('Inside sheet')
+      $.ajax ({
+        type: 'POST',
+        url: '/launchSheet',
+        data: data,
+        success: (data, textStatus, jqXHR) => {
+          console.log('data: ', data)
+          this.setState({
+            loadingEditor: false
+            //uncomment to enable modal:
+            // modal: true,
+            // url: data
+          }, () => window.open(data));
+        },
+        error: function(XMLHttpRequest, textStatus, errorThrown) {
+          this.setState({loadingEditor: false})
+          console.error("DOWNLOAD ERROR", errorThrown);
+        },
+      });
+    }
+    // else if(show) {
+    //   console.log("u have ppt")
+    //   $.ajax ({
+    //     type: 'POST',
+    //     url: '/launchShow',
+    //     data: data,
+    //     success: (data, textStatus, jqXHR) => {
+    //       console.log('data: ', data)
+    //       this.setState({
+    //         loadingEditor: false
+    //         //uncomment to enable modal:
+    //         // modal: true,
+    //         // url: data
+    //       }, () => window.open(data));
+    //     },
+    //     error: function(XMLHttpRequest, textStatus, errorThrown) {
+    //       console.error("DOWNLOAD ERROR", errorThrown);
+    //     },
+    //   });
+    // }
+    else {
+      this.setState({loadingEditor: false})
+      window.alert('File format not supported by editor')
+    }
+  }
+
+  drag(e) {
+    e.dataTransfer.setData("id", e.target.id);
+  }
+
+  drop(e) {
+    e.preventDefault();
+    console.log('e.target.id: ', e.target.id)
+    let data = {
+      id: e.dataTransfer.getData("id"),
+      folder: e.target.id
+    }
+    console.log('data inside FileListEntry drop: ', data)
     $.ajax ({
       type: 'POST',
-      url: '/launchEditor',
+      url: '/moveFile',
       data: data,
       success: (data, textStatus, jqXHR) => {
         console.log('data: ', data)
+        this.props.getFiles();
         this.setState({
           loadingEditor: false
-          //uncomment to enable modal:
-          // modal: true,
-          // url: data
-        }, () => window.open(data));
+        });
       },
       error: function(XMLHttpRequest, textStatus, errorThrown) {
+        this.setState({loadingEditor: false})
         console.error("DOWNLOAD ERROR", errorThrown);
       },
     });
+
+
+
+    //update folder_id of id=data so that folder_id=
   }
 
   toggle() {
@@ -164,8 +253,8 @@ class FileListEntry extends React.Component {
           <Rename file={this.props.file} getFiles={this.props.getFiles} getFilePath={this.getFilePath}/>
           <Col xs="12" sm="8" md="auto" className="mr-md-auto text-center text-sm-left">
             {this.props.file.is_folder
-              ? <img width="32px" src={folderIcon} alt="folder icon"/>
-              : <img width="32px" src={"/icons/" + prettyFileIcons.getIcon(this.props.file.name, "svg")} alt="file icon"/>
+              ? <img ref={this.props.file.id} id={this.props.file.id} width="32px" src={folderIcon} alt="folder icon" onDragStart={this.drag} onDrop={this.drop}/>
+              : <img ref={this.props.file.id} id={this.props.file.id} width="32px" src={"/icons/" + prettyFileIcons.getIcon(this.props.file.name, "svg")} alt="file icon" onDragStart={this.drag}/>
             }
             {this.props.file.is_folder
               ? <span className="file-name align-middle ml-2 text-left"><a href={'/folder/' + this.props.file.id }>{this.props.file.name}</a></span>

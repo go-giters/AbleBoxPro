@@ -145,7 +145,7 @@ app.get('/home', checkUser, (req, res) => {
   res.sendFile(path.resolve(__dirname + '/../client/dist/index.html'));
 });
 
-app.post('/launchEditor/', (req, res) => {
+app.post('/launchWriter', (req, res) => {
   db.getHash(req.body.id, function (err, result) {
     if (err) {
       res.status = 404;
@@ -156,37 +156,74 @@ app.post('/launchEditor/', (req, res) => {
       var hash = result[0].hash
       console.log('hash: ', hash)
       var url = `https://ipfs.io/ipfs/${hash}`
-      var awsurl = 'https://s3-us-west-2.amazonaws.com/myabx/1/zinia.docx?versionId=null'
-      // var url = `localhost:8080/ipfs/${hash}`
-      // var prefix = '/ip4/127.0.0.1/tcp/5001'
+      console.log('url: ', url)
       const zoho = require('./config.js').editor.apikey;
-      request(`https://writer.zoho.com/writer/remotedoc.im?url=${url}&saveurl=${awsurl}&mode=collabedit&apikey=${zoho}`, { json: true }, (err, response, body) => {
+      request(`https://writer.zoho.com/writer/remotedoc.im?url=${url}&mode=collabedit&apikey=${zoho}`, { json: true }, (err, response, body) => {
         if (err) { return console.log(err); }
         var arr = body.split('=');
         var body = arr[1] + '=' + arr[2].slice(0, -7);
         res.status(200).json(body)
       });
-
-      // var url1 = `https://ipfs.io/ipfs/QmeF2Pywk2X1FrgcZQokYEBKZsZT4EnB2hStRDB1AczQWB`
-      // var url2 = `https://ipfs.io/ipfs/QmeKBxiUATszfnftZYVkkVqC4odxqpneXxk1BFoEcbn7nm`
-      // var content1 = `/Users/adellehousker/legacy/AbleBoxPro/policydocs/zinia.docx`
-      // var content2 = `/Users/adellehousker/legacy/AbleBoxPro/policydocs/zinnia.docx`
-      // request(`https://writer.zoho.com/writer/v1/remote/comparedocs?doc1=${content1}&doc2=${content2}&apikey=${zoho}`, { json: true }, (err, response, body) => {
-      //   // if (err) { return console.log(err); }
-      //   console.log('arguments: ', arguments)
-      //   console.log('err: ', err)
-      //   console.log('response: ', response)
-      //   console.log('body: ', body)
-      //   res.status(200).json(body)
-      // });
-
-
-
-
-
     };
   });
 });
+
+app.post('/launchSheet', (req, res) => {
+  db.getHash(req.body.id, function (err, result) {
+    if (err) {
+      res.status = 404;
+      //must refresh or this error will be thrown
+      res.write(err);
+      res.end();
+    } else {
+      var hash = result[0].hash
+      console.log('hash: ', hash)
+      var url = `https://ipfs.io/ipfs/${hash}`
+      console.log('url: ', url)
+      const zoho = require('./config.js').editor.apikey;
+      request(`https://sheet.zoho.com/sheet/remotedoc.im?url=${url}&mode=collabedit&apikey=${zoho}`, { json: true }, (err, response, body) => {
+        if (err) { return console.log(err); }
+        console.log('Inside launchSheet body: ', body)
+        var arr = body.split('=');
+        console.log('arr: ', arr)
+        var body = arr[2] + '=' + arr[3].slice(0, -11);
+        console.log('body: ', body)
+        res.status(200).json(body)
+      });
+    };
+  });
+});
+
+// app.post('/launchShow', (req, res) => {
+//   db.getHash(req.body.id, function (err, result) {
+//     if (err) {
+//       res.status = 404;
+//       //must refresh or this error will be thrown
+//       res.write(err);
+//       res.end();
+//     } else {
+//       var hash = result[0].hash
+//       console.log('hash: ', hash)
+//       var url = `https://ipfs.io/ipfs/${hash}`
+//       request(url, { json: true }, (err, response, body) => {
+//         console.log('response body to ipfs hash: ', body.length)
+//       })
+//       // var url = 'http://www.cambridge.org/download_file/view/833678/109493/'
+//       console.log('url: ', url)
+//       const zoho = require('./config.js').editor.apikey;
+//       request(`https://show.zoho.com/show/remotedoc.im?url=${url}&mode=collabedit&apikey=${zoho}`, { json: true }, (err, response, body) => {
+//         if (err) { return console.log(err); }
+//         console.log('Inside launchSheet body: ', body)
+//         var arr = body.split('=');
+//         console.log('arr: ', arr)
+//         var body = arr[2] + '=' + arr[3].slice(0, -11);
+//         console.log('body: ', body)
+//         res.status(200).json(body)
+//       });
+//     };
+//   });
+// });
+
 
 app.post('/login', (req, res) => {
   let email = req.body.email;
@@ -393,11 +430,29 @@ app.put('/updateName', function(req, res) {
 
 app.post('/createFolder', createFolder, function(req, res) {
   db.createFolder(req, function(err, result) {
+    console.log('inside db.createFolder!!!')
     if (err) {
       res.status = 404;
       res.write('UNABLE TO CREATE FOLDER');
       res.end();
     } else {
+      console.log('this is the result from db.createFolder: ', result)
+      res.status = 200;
+      res.write(JSON.stringify({folder_id: result.insertId}));
+      res.end();
+    }
+  });
+});
+
+app.post('/moveFile', createFolder, function(req, res) {
+  if(typeof req.body.folder)
+  db.moveFile(req.body.folder, req.body.id, function(err, result) {
+    if (err) {
+      res.status = 404;
+      res.write('UNABLE TO CREATE FOLDER');
+      res.end();
+    } else {
+      console.log('this is the result from db.moveFile: ', result)
       res.status = 200;
       res.write(JSON.stringify({folder_id: result.insertId}));
       res.end();

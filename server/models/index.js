@@ -71,7 +71,8 @@ const createFolder = (req, cb) => {
     folder_id: req.session.folderId ? req.session.folderId : 0,
     user_id: req.session.user,
     s3_objectId: `${req.session.user}/${req.body.folderName}/`,
-    is_folder: 1
+    is_folder: 1,
+    hash: ''
   };
 
   const query = 'INSERT INTO files SET ?';
@@ -124,6 +125,17 @@ const getAllFolders = (cb) => {
 const updateName = (name, id, cb) => {
   const query = 'UPDATE files SET name = ? WHERE id = ?';
   db.connection.query(query, [name, id], (err, result) => {
+    if (err) {
+      cb(err, null);
+    } else {
+      cb(null, result);
+    }
+  });
+};
+
+const moveFile = (folder, id, cb) => {
+  const query = 'UPDATE files SET folder_id = ? WHERE id = ?';
+  db.connection.query(query, [folder, id], (err, result) => {
     if (err) {
       cb(err, null);
     } else {
@@ -245,3 +257,4 @@ exports.verifyFileExistenceAndPermissions = verifyFileExistenceAndPermissions;
 exports.getHash = getHash;
 exports.updateName = updateName;
 exports.getAllFolders = getAllFolders;
+exports.moveFile = moveFile;

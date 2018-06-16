@@ -62,7 +62,10 @@ class Dropzone extends React.Component {
   dropHandler(e) {
     e.preventDefault();
 
+    console.log('event in dropHandler: ', e)
+
     const data = e.dataTransfer;
+    console.log('data in dropHandler: ', data)
     const items = data.items ? [...data.items] : [...data.files];
     const files = [];
     items.forEach(item => {
@@ -87,7 +90,7 @@ class Dropzone extends React.Component {
 
     data.items ? data.items.clear() : data.clearData();
 
-    this.props.handleFiles(files);
+    // this.props.handleFiles(files);
 
   }
 

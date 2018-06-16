@@ -51,6 +51,15 @@ class AllFiles extends React.Component {
       url: '/getfiles',
       contentType: 'application/json; charset=utf-8',
       success: (data, textStatus, jqXHR) => {
+
+        // console.log('inside getFiles data: ', data)
+        // let dataObj = JSON.parse(data);
+        // console.log('dataObj: ', dataObj)
+        // dataObj.result.forEach(file => {
+        //   let el = document.getElementById(file.id)
+        //   console.log('el: ', el)
+          // new Draggable(el)
+        // })
         this.setState({
           files: JSON.parse(data).result,
           path: JSON.parse(data).path
@@ -68,6 +77,7 @@ class AllFiles extends React.Component {
       url: '/getfolders',
       contentType: 'application/json; charset=utf-8',
       success: (data, textStatus, jqXHR) => {
+        console.log('inside getAllFolders data: ', data)
         this.setState({
           allFolders: JSON.parse(data).result
         });
@@ -210,6 +220,34 @@ class AllFiles extends React.Component {
     });
   }
 
+  drop(e) {
+    e.preventDefault();
+    console.log('drop e.target: ', e.target.innerText)
+    let folder = e.target.innerText === 'Home' ? 0 : e.target.innerText
+    console.log('folder in drop: ', folder)
+    let data = {
+      id: e.dataTransfer.getData("id"),
+      folder: folder
+    }
+    console.log('data inside FileListEntry drop: ', data)
+    $.ajax ({
+      type: 'POST',
+      url: '/moveFile',
+      data: data,
+      success: (data, textStatus, jqXHR) => {
+        console.log('data: ', data)
+        this.props.getFiles();
+        this.setState({
+          loadingEditor: false
+        });
+      },
+      error: function(XMLHttpRequest, textStatus, errorThrown) {
+        this.setState({loadingEditor: false})
+        console.error("DOWNLOAD ERROR", errorThrown);
+      },
+    });
+  }
+
   render () {
     if (!this.state.files) {
       return null;
@@ -235,8 +273,9 @@ class AllFiles extends React.Component {
             </Modal>
           </Col>
         </Row>
-        <Path path = {this.state.path}/>
+
         <Dropzone files={this.state.files} handleFiles={this.handleFiles} searchMode={this.state.searchMode}>
+        <Path path = {this.state.path} drop={this.drop}/>
           {this.state.files.length
             ? this.state.files.map((file, i) => <FileListEntry key={file.id || i} file={file}
               handleClickDelete={this.handleClickDelete}
