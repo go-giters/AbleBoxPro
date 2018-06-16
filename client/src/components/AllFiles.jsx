@@ -6,11 +6,10 @@ import { withRouter } from 'react-router-dom';
 import { Row, Col, Input, Button, Modal, ModalHeader, ModalBody, ModalFooter} from 'reactstrap';
 import css from 'Src/styles/AllFiles.css';
 import Search from 'Src/components/Search.jsx';
-import $ from "jquery";
+import $ from 'jquery';
 import createFolderIcon from 'Src/assets/createFolder.png';
 import { debounce } from 'lodash';
-import os from 'os';
-
+import ipfsAPI from 'ipfs-api';
 
 
 class AllFiles extends React.Component {
@@ -18,10 +17,14 @@ class AllFiles extends React.Component {
     super(props);
 
     this.state = {
+      files: null,
       searchMode: false,
       folderName: '',
-      path: []
+      path: [],
+      allFolders: null
     };
+
+    this.ipfsApi = ipfsAPI('localhost', '5001')
 
     this.handleClick = this.handleClick.bind(this);
     this.handleFiles = this.handleFiles.bind(this);
@@ -29,15 +32,17 @@ class AllFiles extends React.Component {
     this.handleTitleChange = this.handleTitleChange.bind(this);
     this.handleKeyPress = this.handleKeyPress.bind(this);
     this.createFolder = this.createFolder.bind(this);
-    this.handleClick = this.handleClick.bind(this);
-    this.handleFiles = this.handleFiles.bind(this);
     this.searchHandler = debounce(this.searchHandler.bind(this), 500);
     this.handleClickDelete = this.handleClickDelete.bind(this);
     this.toggle = this.toggle.bind(this);
+    this.saveToIpfs = this.saveToIpfs.bind(this);
+    this.getFiles = this.getFiles.bind(this);
+    this.getAllFolders = this.getAllFolders.bind(this);
   }
 
   componentDidMount() {
     this.getFiles();
+    this.getAllFolders();
   }
 
   getFiles() {
@@ -46,11 +51,29 @@ class AllFiles extends React.Component {
       url: '/getfiles',
       contentType: 'application/json; charset=utf-8',
       success: (data, textStatus, jqXHR) => {
-        console.log(JSON.parse(data))
+        console.log(JSON.parse(data));
         this.setState({
           files: JSON.parse(data).result,
           path: JSON.parse(data).path
-        })
+        });
+      },
+      error: function(XMLHttpRequest, textStatus, errorThrown) {
+        alert(errorThrown); // need to decide on what we are doing here with the error
+      },
+    });
+  }
+
+  getAllFolders() {
+    $.ajax ({
+      type: 'GET',
+      url: '/getfolders',
+      contentType: 'application/json; charset=utf-8',
+      success: (data, textStatus, jqXHR) => {
+        console.log('data: ', data)
+        console.log(JSON.parse(data));
+        this.setState({
+          allFolders: JSON.parse(data).result
+        });
       },
       error: function(XMLHttpRequest, textStatus, errorThrown) {
         alert(errorThrown); // need to decide on what we are doing here with the error
@@ -63,11 +86,36 @@ class AllFiles extends React.Component {
   }
 
   handleFiles(files) {
-    // add upload key to trigger upload upon FileListEntry mount
-    files.forEach(file => file.upload = true);
-    this.setState({
-      files: [...this.state.files].concat(files),
-    });
+    let reader = new window.FileReader()
+    reader.readAsArrayBuffer(files[0])
+    reader.onloadend = () => {
+      this.saveToIpfs(reader, files);
+    }
+    // files.forEach(file => file.upload = true);
+    // this.setState({
+    //   files: [...this.state.files].concat(files),
+    // });
+  }
+
+  saveToIpfs(reader, files) {
+    let ipfsId
+    const buffer = Buffer.from(reader.result)
+    this.ipfsApi.add(buffer, { progress: (prog) => console.log(`received: ${prog}`) })
+    .then((response) => {
+      console.log('ipfs response: ', response)
+      ipfsId = response[0].hash
+      var fileLocation = 'https://ipfs.io/ipfs/' + ipfsId
+      files.forEach(file => {
+        file.upload = true;
+        file.hash = ipfsId
+        console.log('file: ', file)
+      });
+      this.setState({
+        files: [...this.state.files].concat(files),
+      });
+    }).catch((err) => {
+      console.error(err)
+    })
   }
 
   searchHandler(value) {
@@ -174,7 +222,7 @@ class AllFiles extends React.Component {
       <React.Fragment>
         <Row className="mt-3 no-gutters">
           <Col xs="10" sm="10" md="9" lg="8" className="mr-auto">
-           <Search searchHandler={this.searchHandler} handleKeyPress ={this.handleKeyPress} />
+            <Search searchHandler={this.searchHandler} handleKeyPress ={this.handleKeyPress} />
           </Col>
           <Col xs="auto">
             <img className="create-folder" background="transparent" src={createFolderIcon} alt="create folder" onClick={this.toggle}/>
@@ -193,7 +241,10 @@ class AllFiles extends React.Component {
         <Path path = {this.state.path}/>
         <Dropzone files={this.state.files} handleFiles={this.handleFiles} searchMode={this.state.searchMode}>
           {this.state.files.length
-            ? this.state.files.map((file, i) => <FileListEntry key={file.id} file={file} handleClickDelete={this.handleClickDelete}/>)
+            ? this.state.files.map((file, i) => <FileListEntry key={file.id || i} file={file}
+              handleClickDelete={this.handleClickDelete}
+              getFiles={this.getFiles}
+            />)
             : null
           }
         </Dropzone>
@@ -204,7 +255,7 @@ class AllFiles extends React.Component {
           </Col>
         </Row>
       </React.Fragment>
-    )
+    );
   }
 }
 
