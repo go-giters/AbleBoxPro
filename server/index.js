@@ -447,6 +447,7 @@ app.post('/createFolder', createFolder, function(req, res) {
 });
 
 app.post('/moveFile', createFolder, function(req, res) {
+  if(typeof req.body.folder)
   db.moveFile(req.body.folder, req.body.id, function(err, result) {
     if (err) {
       res.status = 404;

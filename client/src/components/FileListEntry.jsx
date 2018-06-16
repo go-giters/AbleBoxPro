@@ -49,7 +49,7 @@ class FileListEntry extends React.Component {
   }
 
 	componentDidMount() {
-    let el = this.refs[this.props.file.id.toString()];
+    // let el = this.refs[this.props.file.id.toString()];
 		if (this.state.upload) {
       console.log('this.props.file: ', this.props.file)
 
@@ -191,6 +191,7 @@ class FileListEntry extends React.Component {
 
   drop(e) {
     e.preventDefault();
+    console.log('e.target.id: ', e.target.id)
     let data = {
       id: e.dataTransfer.getData("id"),
       folder: e.target.id
@@ -202,9 +203,10 @@ class FileListEntry extends React.Component {
       data: data,
       success: (data, textStatus, jqXHR) => {
         console.log('data: ', data)
+        this.props.getFiles();
         this.setState({
           loadingEditor: false
-        }, () => window.open(data));
+        });
       },
       error: function(XMLHttpRequest, textStatus, errorThrown) {
         this.setState({loadingEditor: false})
