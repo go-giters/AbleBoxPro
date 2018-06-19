@@ -1,5 +1,5 @@
 html * {
-  font-family: 'Open Sans'
+  font-family: 'Open Sans';
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -21,4 +21,11 @@ a, .btn-outline-primary {
 
 .progress-bar {
   background-color: #25a5ff;
+}
+
+.footer {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  font-size: 1vw;
 }
