@@ -146,6 +146,7 @@ app.get('/home', checkUser, (req, res) => {
 });
 
 app.post('/launchWriter', (req, res) => {
+  console.log('inside server launchWriter')
   db.getHash(req.body.id, function (err, result) {
     if (err) {
       res.status = 404;

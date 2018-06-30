@@ -7,7 +7,7 @@
     "react-dev": "webpack -d --watch",
     "server-dev": "nodemon server/index.js",
     "ipfs-dev": "ipfs daemon",
-    "start": "node server/index.js && ipfs daemon",
+    "start": "node server/index.js",
     "build": "webpack",
     "postinstall": "npm run build"
   },
