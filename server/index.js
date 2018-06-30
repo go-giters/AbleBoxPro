@@ -180,7 +180,7 @@ app.post('/launchSheet', (req, res) => {
       console.log('hash: ', hash)
       var url = `https://ipfs.io/ipfs/${hash}`
       console.log('url: ', url)
-      const zoho = require('./config.js').editor.apikey;
+      const zoho = process.env.EDITOR || require('./config.js').editor.apikey;
       request(`https://sheet.zoho.com/sheet/remotedoc.im?url=${url}&mode=collabedit&apikey=${zoho}`, { json: true }, (err, response, body) => {
         if (err) { return console.log(err); }
         console.log('Inside launchSheet body: ', body)
