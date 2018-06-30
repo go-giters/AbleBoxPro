@@ -106,7 +106,7 @@ class AllFiles extends React.Component {
   }
 
   saveToIpfs(reader, files) {
-    conosle.log('inside saveToIpfs')
+    console.log('inside saveToIpfs')
     let ipfsId
     const buffer = Buffer.from(reader.result)
     this.ipfsApi.add(buffer, { progress: (prog) => console.log(`received: ${prog}`) })
