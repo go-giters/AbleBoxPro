@@ -93,6 +93,7 @@ class AllFiles extends React.Component {
   }
 
   handleFiles(files) {
+    console.log('inside handleFiles')
     let reader = new window.FileReader()
     reader.readAsArrayBuffer(files[0])
     reader.onloadend = () => {
@@ -105,6 +106,7 @@ class AllFiles extends React.Component {
   }
 
   saveToIpfs(reader, files) {
+    conosle.log('inside saveToIpfs')
     let ipfsId
     const buffer = Buffer.from(reader.result)
     this.ipfsApi.add(buffer, { progress: (prog) => console.log(`received: ${prog}`) })

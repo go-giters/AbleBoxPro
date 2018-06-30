@@ -157,7 +157,7 @@ app.post('/launchWriter', (req, res) => {
       console.log('hash: ', hash)
       var url = `https://ipfs.io/ipfs/${hash}`
       console.log('url: ', url)
-      const zoho = require('./config.js').editor.apikey;
+      const zoho = process.env.EDITOR || require('./config.js').editor.apikey;
       request(`https://writer.zoho.com/writer/remotedoc.im?url=${url}&mode=collabedit&apikey=${zoho}`, { json: true }, (err, response, body) => {
         if (err) { return console.log(err); }
         var arr = body.split('=');
@@ -292,6 +292,7 @@ app.get('/logout', (req, res) => {
 });
 
 app.post('/upload', checkUser, upload.single('file'), function(req, res, next) {
+  console.log('inside server post to upload')
   //TODO: validate user email/userid against the sessionid
   db.createFile(req, function(err, result) {
     if (err) {
@@ -299,6 +300,7 @@ app.post('/upload', checkUser, upload.single('file'), function(req, res, next) {
       res.write('UNABLE TO UPLOAD FILE');
       res.end();
     } else {
+      console.log('inside result from db createFile')
       res.status = 200;
       res.write('Successfully uploaded ' + req.file.length + ' files!');
       res.end();
