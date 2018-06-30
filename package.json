@@ -6,7 +6,8 @@
   "scripts": {
     "react-dev": "webpack -d --watch",
     "server-dev": "nodemon server/index.js",
-    "ipfs-dev": "ipfs daemon"
+    "ipfs-dev": "ipfs daemon",
+    "start:" "node server/index.js && ipfs daemon"
   },
   "repository": {
     "type": "git",
