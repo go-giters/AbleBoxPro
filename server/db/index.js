@@ -7,7 +7,7 @@ const mysql = require('mysql');
 //   database: "ablebox"
 // });
 
-const connection = mysql.createConnection(process.env.JAWSDB_URL);
+const connection = mysql.createConnection(process.env.JAWSDB_URL || require('../config.js').jawsDB);
 
 connection.connect();
 

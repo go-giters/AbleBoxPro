@@ -146,7 +146,6 @@ app.get('/home', checkUser, (req, res) => {
 });
 
 app.post('/launchWriter', (req, res) => {
-  console.log('inside server launchWriter')
   db.getHash(req.body.id, function (err, result) {
     if (err) {
       res.status = 404;
@@ -293,7 +292,6 @@ app.get('/logout', (req, res) => {
 });
 
 app.post('/upload', checkUser, upload.single('file'), function(req, res, next) {
-  console.log('inside server post to upload')
   //TODO: validate user email/userid against the sessionid
   db.createFile(req, function(err, result) {
     if (err) {
@@ -301,7 +299,6 @@ app.post('/upload', checkUser, upload.single('file'), function(req, res, next) {
       res.write('UNABLE TO UPLOAD FILE');
       res.end();
     } else {
-      console.log('inside result from db createFile')
       res.status = 200;
       res.write('Successfully uploaded ' + req.file.length + ' files!');
       res.end();
