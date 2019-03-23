@@ -1,12 +1,12 @@
 # AbleBox
 
-> AbleBox is a SaaS that enables users to upload their files to the cloud, offering individuals and teams the ability to create and collaborate efficiently.
+> [AbleBox is a SaaS that enables users to upload their files to the cloud, offering individuals and teams the ability to create and collaborate efficiently.](https://glacial-island-66806.herokuapp.com/)
 
 ## Team
 
   - __Product Owner__: Sarkhan Koshkarli
   - __Scrum Master__: Joseph Gomez
-  - __Development Team Members__: Yang Chen, Hubert Nimitanakit
+  - __Development Team Members__: Yang Chen, Debalina Mukherjee, Hubert Nimitanakit, Ted Green, Adelle Housker, Seth Shill, Happy Situ
 
 ## Table of Contents
 
