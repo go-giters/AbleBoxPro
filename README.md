@@ -9,6 +9,14 @@
   - __Development Team Members__: Yang Chen, Debalina Mukherjee, Hubert Nimitanakit, Ted Green, Adelle Housker, Seth Shill, Happy Situ
 
 ## Table of Contents
+1. [Team](#team)
+1. [Usage](#usage)
+1. [Requirements](#requirements)
+1. [Development](#development)
+    1. [Installing Dependencies](#installing-dependencies)
+    1. [Roadmap](#roadmap)
+1. [Contributing](#contributing)
+
 
 ## Usage
 1. Run schema.sql file from your terminal and make sure you do not have any password for root account:
@@ -26,18 +34,6 @@
 6. Open another Git Bash terminal and execute: npm run server-dev from this directory
 7. Go to the browser and copy paste: http://127.0.0.1:3000/
 8. To utilize blockchain encrypted storage of files (ipfs): "npm run ipfs-dev"
-
-## Road Map
-
-Recommended features to add:
-1. Delete nested folder
-2. Edit folder name
-3. Edit file
-4. Version control (with block chain or s3)
-5. Collaboration
-6. Organization access
-7. Moving file or folders
-8. Display the path for each file in searching mode
 
 
 > Some usage instructions
@@ -61,24 +57,15 @@ npm install
 
 View the project roadmap [here](https://trello.com/b/LqvHxc9R/able-buffalos)
 
-
-## Contributing
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for contribution guidelines.
-
-## Development
-
-### Installing Dependencies
-
-From within the root directory:
-
-```sh
-npm install
-```
-
-### Roadmap
-
-View the project roadmap [here](https://trello.com/b/LqvHxc9R/able-buffalos)
+Recommended features to add:
+1. Delete nested folder
+2. Edit folder name
+3. Edit file
+4. Version control (with block chain or s3)
+5. Collaboration
+6. Organization access
+7. Moving file or folders
+8. Display the path for each file in searching mode
 
 
 ## Contributing
