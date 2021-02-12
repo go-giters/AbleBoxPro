@@ -16,7 +16,7 @@ const os = require('os');
 var request = require('request');
 var multer = require('multer');
 var multerS3 = require('multer-s3');
-const ABLEBOX_BUCKET = require('./config.js').bucketName;
+const ABLEBOX_BUCKET = process.env.ABLEBOX_BUCKET || require('./config.js').bucketName;
 const S3_API_VER = '2006-03-01';
 
 var app = express();
@@ -157,7 +157,7 @@ app.post('/launchWriter', (req, res) => {
       console.log('hash: ', hash)
       var url = `https://ipfs.io/ipfs/${hash}`
       console.log('url: ', url)
-      const zoho = require('./config.js').editor.apikey;
+      const zoho = process.env.EDITOR || require('./config.js').editor.apikey;
       request(`https://writer.zoho.com/writer/remotedoc.im?url=${url}&mode=collabedit&apikey=${zoho}`, { json: true }, (err, response, body) => {
         if (err) { return console.log(err); }
         var arr = body.split('=');
@@ -180,7 +180,7 @@ app.post('/launchSheet', (req, res) => {
       console.log('hash: ', hash)
       var url = `https://ipfs.io/ipfs/${hash}`
       console.log('url: ', url)
-      const zoho = require('./config.js').editor.apikey;
+      const zoho = process.env.EDITOR || require('./config.js').editor.apikey;
       request(`https://sheet.zoho.com/sheet/remotedoc.im?url=${url}&mode=collabedit&apikey=${zoho}`, { json: true }, (err, response, body) => {
         if (err) { return console.log(err); }
         console.log('Inside launchSheet body: ', body)

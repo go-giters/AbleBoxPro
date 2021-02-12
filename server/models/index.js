@@ -169,6 +169,7 @@ const getKey = (id, cb) => {
 };
 
 const getHash = (id, cb) => {
+  console.log('inside model getHash')
   const query = 'SELECT hash, s3_objectId FROM files WHERE id=?';
 
   db.connection.query(query, id, (err, result, fields) => {

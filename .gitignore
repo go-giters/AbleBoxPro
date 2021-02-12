@@ -72,3 +72,4 @@ server/db/index.js
 
 package-lock.json
 *.DS_STORE
+.env

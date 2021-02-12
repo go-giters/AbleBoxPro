@@ -1,8 +1,14 @@
-DROP DATABASE IF EXISTS `ablebox`;
+-- DROP DATABASE IF EXISTS `ablebox`;
 
-CREATE DATABASE `ablebox`;
+-- CREATE DATABASE `ablebox`;
 
-USE `ablebox`;
+-- USE `ablebox`;
+
+DROP DATABASE IF EXISTS `tgskw326mrjqo040`;
+
+CREATE DATABASE `tgskw326mrjqo040`;
+
+USE `tgskw326mrjqo040`;
 
 DROP TABLE IF EXISTS `users`;
 
